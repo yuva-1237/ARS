@@ -23,6 +23,40 @@ ARS automates the entire candidate pipeline — from bulk resume ingestion and A
 
 ---
 
+## 📸 Screenshots
+
+### 1. Landing Page
+![Landing Page](docs/screenshots/01_landing.png)
+
+### 2. Login & Authentication
+![Login Page](docs/screenshots/02_auth.png)
+
+### 3. Recruitment Dashboard
+![Dashboard Overview](docs/screenshots/03_dashboard.png)
+> Real-time metrics: total candidates, active jobs, average match score, pipeline funnel chart, and top skill distribution.
+
+### 4. Resume Intake
+![Resume Intake](docs/screenshots/04_upload.png)
+> Drag-and-drop bulk upload with job linking. Supports PDF, DOCX, TXT, PNG, JPG. Scanned images processed via Tesseract OCR.
+
+### 5. Job Management
+![Job Management](docs/screenshots/05_jobs.png)
+> Create and manage job postings. Gemini automatically extracts required skills, experience, and keywords in the background.
+
+### 6. Candidates Pool
+![Candidates](docs/screenshots/06_candidates.png)
+> Search and filter candidates by name, skill, or email. View AI-parsed profiles, fraud risk scores, and multi-job match scores.
+
+### 7. AI Recruiter Copilot
+![AI Copilot](docs/screenshots/07_copilot.png)
+> RAG-powered chat with persistent session memory. Ask natural language questions to search across all indexed resumes.
+
+### 8. Hiring Analytics
+![Hiring Analytics](docs/screenshots/08_analytics.png)
+> Visual pipeline funnel, core skill distribution, score histograms, and one-click CSV export.
+
+---
+
 ## 🏗️ Architecture
 
 ```

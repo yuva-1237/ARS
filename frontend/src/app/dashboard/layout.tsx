@@ -25,6 +25,7 @@ export default function DashboardLayout({
     notifications, setNotifications, markNotificationRead
   } = useStore();
 
+  const [mounted, setMounted] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [notifDropdownOpen, setNotifDropdownOpen] = useState(false);
   const [jobs, setJobs] = useState<any[]>([]);
@@ -34,12 +35,17 @@ export default function DashboardLayout({
   const dropdownRef = useRef<HTMLDivElement>(null);
   const notifRef = useRef<HTMLDivElement>(null);
 
-  // Auth Guard: redirect to login if no token
+  // Set mounted state
   useEffect(() => {
-    if (!token) {
+    setMounted(true);
+  }, []);
+
+  // Auth Guard: redirect to login if no token and component is mounted
+  useEffect(() => {
+    if (mounted && !token) {
       router.push("/auth");
     }
-  }, [token, router]);
+  }, [token, router, mounted]);
 
   // Load jobs for global filter
   useEffect(() => {
@@ -100,7 +106,7 @@ export default function DashboardLayout({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  if (!token || !user) {
+  if (!mounted || !token || !user) {
     return (
       <div className="min-h-screen bg-[#09090b] flex items-center justify-center">
         <div className="w-10 h-10 rounded-full border-4 border-zinc-800 border-t-indigo-500 animate-spin" />

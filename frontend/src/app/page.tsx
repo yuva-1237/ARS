@@ -9,7 +9,6 @@ import {
 } from "lucide-react";
 
 export default function LandingPage() {
-  const [isAnnual, setIsAnnual] = useState(true);
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
 
   const toggleFaq = (index: number) => {
@@ -102,9 +101,10 @@ export default function LandingPage() {
 
           <nav className="hidden md:flex items-center space-x-8 text-sm text-zinc-400">
             <a href="#features" className="hover:text-white transition-colors">Features</a>
-            <a href="#how-it-works" className="hover:text-white transition-colors">How It Works</a>
-            <a href="#pricing" className="hover:text-white transition-colors">Pricing</a>
-            <a href="#faq" className="hover:text-white transition-colors">FAQ</a>
+            <a href="#faq" className="hover:text-white transition-colors">Documentation</a>
+            <a href="#why-free" className="hover:text-white transition-colors">Community</a>
+            <a href="mailto:support@ars.ai" className="hover:text-white transition-colors">Support</a>
+            <a href="#why-free" className="hover:text-white transition-colors">About ARS</a>
           </nav>
 
           <div className="flex items-center space-x-4">
@@ -145,8 +145,8 @@ export default function LandingPage() {
               <span>Start Screening</span>
               <ArrowRight className="w-4 h-4" />
             </Link>
-            <a href="#pricing" className="w-full sm:w-auto inline-flex items-center justify-center px-8 py-4 bg-zinc-900 border border-zinc-800 text-zinc-300 hover:text-white hover:bg-zinc-800/80 font-semibold rounded-xl transition-colors">
-              Book Demo
+            <a href="#why-free" className="w-full sm:w-auto inline-flex items-center justify-center px-8 py-4 bg-zinc-900 border border-zinc-800 text-zinc-300 hover:text-white hover:bg-zinc-800/80 font-semibold rounded-xl transition-colors">
+              Why ARS is Free
             </a>
           </div>
         </motion.div>
@@ -262,105 +262,103 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Pricing Section */}
-      <section id="pricing" className="py-24 border-t border-zinc-900 bg-zinc-950/30 relative z-10">
+      {/* Why ARS is Free Section */}
+      <section id="why-free" className="py-24 border-t border-zinc-900 bg-zinc-950/30 relative z-10">
+        <div id="about" />
+        <div id="community" />
         <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center mb-10">
-            <h2 className="text-3xl md:text-5xl font-bold text-white mb-4">Pricing Plans</h2>
-            <p className="text-zinc-400 max-w-xl mx-auto mb-6">
-              Flexible options for growing teams, agencies, and enterprise organizations.
-            </p>
-            
-            <div className="inline-flex items-center space-x-3 bg-zinc-900 border border-zinc-800 p-1.5 rounded-xl">
-              <button 
-                onClick={() => setIsAnnual(false)}
-                className={`px-4 py-2 text-xs font-semibold rounded-lg transition-all ${!isAnnual ? 'bg-indigo-600 text-white' : 'text-zinc-400'}`}
-              >
-                Monthly
-              </button>
-              <button 
-                onClick={() => setIsAnnual(true)}
-                className={`px-4 py-2 text-xs font-semibold rounded-lg transition-all ${isAnnual ? 'bg-indigo-600 text-white' : 'text-zinc-400'}`}
-              >
-                Annually (Save 20%)
-              </button>
+          <div className="text-center mb-16">
+            {/* Badges */}
+            <div className="flex flex-wrap items-center justify-center gap-3 mb-6">
+              <span className="inline-flex items-center px-3 py-1 rounded-full border border-indigo-500/30 bg-indigo-500/10 text-indigo-300 text-xs font-bold uppercase tracking-wider">
+                Free Forever
+              </span>
+              <span className="inline-flex items-center px-3 py-1 rounded-full border border-teal-500/30 bg-teal-500/10 text-teal-300 text-xs font-bold uppercase tracking-wider">
+                Community First
+              </span>
+              <span className="inline-flex items-center px-3 py-1 rounded-full border border-violet-500/30 bg-violet-500/10 text-violet-300 text-xs font-bold uppercase tracking-wider">
+                Open Access
+              </span>
             </div>
+
+            <h2 className="text-3xl md:text-5xl font-bold text-white mb-4">Why ARS is Free</h2>
+            <p className="text-indigo-400 font-bold text-lg max-w-xl mx-auto mb-4">
+              ARS is completely free for everyone.
+            </p>
+            <p className="text-zinc-400 max-w-2xl mx-auto text-sm leading-relaxed">
+              We believe powerful AI recruitment tools shouldn't be gated behind premium pricing tiers. ARS is built as a community-driven ecosystem to give equal access to state-of-the-art resume screening technology.
+            </p>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-            {/* Free Tier */}
-            <div className="p-8 rounded-2xl border border-zinc-800 bg-zinc-900/20 flex flex-col justify-between">
-              <div>
-                <span className="text-xs font-bold uppercase tracking-wider text-indigo-400">Starter</span>
-                <h3 className="text-2xl font-bold text-white mt-2">Free Trial</h3>
-                <p className="text-zinc-500 text-sm mt-1">Perfect for evaluating matching parameters.</p>
-                <div className="my-6">
-                  <span className="text-4xl font-extrabold text-white">$0</span>
-                  <span className="text-zinc-400 text-sm"> / month</span>
-                </div>
-                <div className="space-y-3.5 text-zinc-300 text-sm">
-                  <div className="flex items-center space-x-2">
-                    <CheckCircle2 className="w-4.5 h-4.5 text-indigo-400 flex-shrink-0" />
-                    <span>Upload up to 50 Resumes</span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <CheckCircle2 className="w-4.5 h-4.5 text-indigo-400 flex-shrink-0" />
-                    <span>Standard AI Resume Parsing</span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <CheckCircle2 className="w-4.5 h-4.5 text-indigo-400 flex-shrink-0" />
-                    <span>3 Active Job Matches</span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <CheckCircle2 className="w-4.5 h-4.5 text-indigo-400 flex-shrink-0" />
-                    <span>Copilot Chat (RAG-based)</span>
-                  </div>
-                </div>
+          {/* Grid of Reasons */}
+          <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto mb-16">
+            {[
+              {
+                title: "Accessible AI for everyone",
+                desc: "Empowering talent teams, hiring managers, and candidates globally with premium AI matching without financial barriers.",
+              },
+              {
+                title: "Education and innovation first",
+                desc: "Removing high cost-of-entry hurdles to advance hiring tools, enabling modern, merit-based screening criteria.",
+              },
+              {
+                title: "Community-driven platform",
+                desc: "Continuously maintained and updated through open feedback loops, engineering guidelines, and recruiter insights.",
+              },
+              {
+                title: "No hidden fees",
+                desc: "No credit cards, no trial expiration dates, no sudden billing requests, and no hidden subscription costs.",
+              },
+              {
+                title: "No subscription pressure",
+                desc: "Focus purely on finding the right match, not on counting token usage limits or managing complex team licenses.",
+              },
+              {
+                title: "Equal access for all users",
+                desc: "Every single registered account receives full, unrestricted access to the entire capabilities suite of the platform.",
+              }
+            ].map((reason, idx) => (
+              <div key={idx} className="p-6 rounded-2xl border border-zinc-900 bg-zinc-900/10 hover:border-zinc-800 transition-all duration-200">
+                <div className="w-1.5 h-6 bg-indigo-500 rounded-full mb-4" />
+                <h3 className="text-base font-bold text-white mb-2">{reason.title}</h3>
+                <p className="text-zinc-400 text-xs leading-normal">{reason.desc}</p>
               </div>
-              <Link href="/auth?tab=signup" className="mt-8 w-full text-center py-3 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 font-semibold rounded-xl transition-colors">
-                Get Started
-              </Link>
-            </div>
+            ))}
+          </div>
 
-            {/* Pro Tier */}
-            <div className="p-8 rounded-2xl border border-indigo-500/50 bg-indigo-500/5 relative flex flex-col justify-between shadow-lg shadow-indigo-500/5">
-              <div className="absolute top-4 right-4 bg-indigo-500 text-white text-xs font-bold px-3 py-1 rounded-full uppercase">
-                Popular
-              </div>
-              <div>
-                <span className="text-xs font-bold uppercase tracking-wider text-indigo-300">Growth</span>
-                <h3 className="text-2xl font-bold text-white mt-2">Professional</h3>
-                <p className="text-indigo-200/50 text-sm mt-1">For staffing agencies and talent teams.</p>
-                <div className="my-6">
-                  <span className="text-4xl font-extrabold text-white">${isAnnual ? "149" : "189"}</span>
-                  <span className="text-zinc-400 text-sm"> / month</span>
+          {/* User Access Box */}
+          <div className="max-w-4xl mx-auto rounded-3xl border border-indigo-500/20 bg-indigo-500/5 p-8 relative overflow-hidden shadow-xl shadow-indigo-500/5">
+            <div className="absolute top-[-50px] right-[-50px] w-48 h-48 bg-indigo-500/10 rounded-full filter blur-3xl pointer-events-none" />
+            <h3 className="text-lg font-bold text-white text-center mb-6 flex items-center justify-center space-x-2">
+              <Sparkles className="w-4.5 h-4.5 text-indigo-400 animate-pulse" />
+              <span>Unrestricted Capabilities Access</span>
+            </h3>
+            
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs font-semibold text-zinc-350 text-center mb-6">
+              {[
+                "OpenAI Models",
+                "Claude Models",
+                "Gemini Models",
+                "Chat History",
+                "Memory System",
+                "Voice Assistant",
+                "Image Analysis",
+                "File Analysis",
+                "Web Search",
+                "Research Tools",
+                "Future Features",
+                "No Restrictions"
+              ].map((access, idx) => (
+                <div key={idx} className="py-2.5 px-3 bg-zinc-950/40 border border-zinc-900 rounded-xl flex items-center justify-center">
+                  <span>{access}</span>
                 </div>
-                <div className="space-y-3.5 text-zinc-200 text-sm">
-                  <div className="flex items-center space-x-2">
-                    <CheckCircle2 className="w-4.5 h-4.5 text-indigo-400 flex-shrink-0" />
-                    <span>Unlimited Resume Uploads</span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <CheckCircle2 className="w-4.5 h-4.5 text-indigo-400 flex-shrink-0" />
-                    <span>Image Resumes OCR Parsing</span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <CheckCircle2 className="w-4.5 h-4.5 text-indigo-400 flex-shrink-0" />
-                    <span>Unlimited Active Jobs</span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <CheckCircle2 className="w-4.5 h-4.5 text-indigo-400 flex-shrink-0" />
-                    <span>Detailed Fraud & Risk Scoring</span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <CheckCircle2 className="w-4.5 h-4.5 text-indigo-400 flex-shrink-0" />
-                    <span>Interview Question Exporter</span>
-                  </div>
-                </div>
-              </div>
-              <Link href="/auth?tab=signup" className="mt-8 w-full text-center py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold rounded-xl transition-all hover:shadow-lg hover:shadow-indigo-500/20">
-                Subscribe Now
-              </Link>
+              ))}
+            </div>
+            
+            <div className="text-center border-t border-zinc-900 pt-5 mt-2">
+              <p className="text-xs text-zinc-500">
+                No active subscriptions. No hidden costs. Open access for everyone.
+              </p>
             </div>
           </div>
         </div>
@@ -371,7 +369,7 @@ export default function LandingPage() {
         <div className="max-w-4xl mx-auto px-6">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-5xl font-bold text-white mb-4">Frequently Asked Questions</h2>
-            <p className="text-zinc-400">Quick answers about our parsing pipeline, system integration, and pricing tiers.</p>
+            <p className="text-zinc-400">Quick answers about our parsing pipeline, system integration, and free access model.</p>
           </div>
 
           <div className="space-y-4">
@@ -417,9 +415,10 @@ export default function LandingPage() {
           
           <div className="flex space-x-8 mb-4 md:mb-0">
             <a href="#features" className="hover:text-zinc-300 transition-colors">Features</a>
-            <a href="#how-it-works" className="hover:text-zinc-300 transition-colors">How It works</a>
-            <a href="#pricing" className="hover:text-zinc-300 transition-colors">Pricing</a>
-            <a href="mailto:info@ars.ai" className="hover:text-zinc-300 transition-colors">Contact</a>
+            <a href="#faq" className="hover:text-zinc-300 transition-colors">Documentation</a>
+            <a href="#why-free" className="hover:text-zinc-300 transition-colors">Community</a>
+            <a href="mailto:support@ars.ai" className="hover:text-zinc-300 transition-colors">Support</a>
+            <a href="#why-free" className="hover:text-zinc-300 transition-colors">About ARS</a>
           </div>
 
           <div>

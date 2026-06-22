@@ -107,6 +107,38 @@ def read_user_me(current_user: User = Depends(get_current_user)):
     """
     return current_user
 
+@router.put("/me", response_model=UserOut)
+def update_user_me(
+    user_in: UserUpdate,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Update details of the current logged-in user.
+    """
+    if user_in.email is not None:
+        if user_in.email != current_user.email:
+            existing = db.query(User).filter(User.email == user_in.email).first()
+            if existing:
+                raise HTTPException(
+                    status_code=400,
+                    detail="A user with this email address already exists."
+                )
+            current_user.email = user_in.email
+            
+    if user_in.full_name is not None:
+        current_user.full_name = user_in.full_name
+        
+    if user_in.password is not None:
+        current_user.hashed_password = get_password_hash(user_in.password)
+        
+    if user_in.role is not None:
+        current_user.role = user_in.role
+        
+    db.commit()
+    db.refresh(current_user)
+    return current_user
+
 @router.post("/forgot-password")
 def forgot_password(email: str, db: Session = Depends(get_db)):
     """

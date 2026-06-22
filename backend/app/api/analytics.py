@@ -8,10 +8,10 @@ from typing import Dict, Any, List, Optional
 from collections import Counter
 from backend.app.core.database import get_db
 from backend.app.models import Candidate, CandidateScore, JobDescription, Resume, User
-from backend.app.api.deps import get_current_user, RoleChecker
+from backend.app.api.deps import get_current_user
 
 router = APIRouter()
-hr_only = RoleChecker(["hr_manager", "admin"])
+# Analytics is accessible to all authenticated users (get_current_user handles auth)
 
 @router.get("/")
 def get_analytics(

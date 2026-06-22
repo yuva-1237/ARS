@@ -104,10 +104,13 @@ def get_current_user(
             if not user.is_active:
                 raise HTTPException(status_code=400, detail="Inactive user")
             return user
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
+            status_code=status.HTTP_401_UNAUTHORIZED,
             detail=f"Could not validate credentials: {str(e)}",
+            headers={"WWW-Authenticate": "Bearer"},
         )
 
 def get_current_active_superuser(

@@ -1,0 +1,102 @@
+# FastAPI
+fastapi
+uvicorn[standard]
+python-multipart
+
+# Database
+sqlalchemy
+psycopg2-binary
+alembic
+
+# Environment Variables
+python-dotenv
+
+# Data Validation
+pydantic
+pydantic-settings
+
+# Resume Parsing
+pypdf
+pdfplumber
+python-docx
+docx2txt
+
+# Data Processing
+pandas
+numpy
+
+# AI & LLM
+google-generativeai
+langchain
+langchain-core
+langchain-community
+langchain-google-genai
+langgraph
+
+# Vector Database
+chromadb
+faiss-cpu
+
+# Embeddings
+sentence-transformers
+
+# RAG
+tiktoken
+
+# HTTP Requests
+requests
+httpx
+
+# Authentication
+python-jose[cryptography]
+passlib[bcrypt]
+
+# File Handling
+aiofiles
+
+# Visualization & Analytics
+matplotlib
+plotly
+
+# Logging
+loguru
+
+# Background Tasks
+celery
+redis
+
+# Testing
+pytest
+pytest-asyncio
+
+# CORS
+starlette
+
+# Email Notifications
+fastapi-mail
+
+# OCR (Image Resumes)
+pytesseract
+Pillow
+
+# GitHub / Portfolio Analysis
+beautifulsoup4
+lxml
+
+# Utilities
+tqdm
+rich
+
+# Advanced
+spacy
+nltk
+scikit-learn
+
+# Voice
+speechrecognition
+pyaudio
+gtts
+
+# MRA
+opencv-python
+unstructured

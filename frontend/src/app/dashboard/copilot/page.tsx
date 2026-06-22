@@ -5,7 +5,8 @@ import { useStore } from "@/store/useStore";
 import { api } from "@/utils/api";
 import { 
   MessageSquare, Send, Sparkles, RefreshCw, Trash2, 
-  HelpCircle, User, Cpu, ArrowRight, CheckCircle2 
+  HelpCircle, User, Cpu, ArrowRight, CheckCircle2,
+  Share2, Mic
 } from "lucide-react";
 
 interface Message {
@@ -15,13 +16,75 @@ interface Message {
 }
 
 export default function CopilotPage() {
-  const { selectedJobId } = useStore();
+  const { selectedJobId, user, token } = useStore();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [sessionId, setSessionId] = useState("");
+  const [recognizing, setRecognizing] = useState(false);
   
   const chatEndRef = useRef<HTMLDivElement>(null);
+
+  const startSpeechRecognition = () => {
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      alert("Speech recognition is not supported in this browser. Please use Chrome, Edge, or Safari.");
+      return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.continuous = false;
+    recognition.interimResults = false;
+    recognition.lang = "en-US";
+
+    recognition.onstart = () => {
+      setRecognizing(true);
+    };
+
+    recognition.onerror = (event: any) => {
+      console.error("Speech recognition error:", event.error);
+      setRecognizing(false);
+    };
+
+    recognition.onend = () => {
+      setRecognizing(false);
+    };
+
+    recognition.onresult = async (event: any) => {
+      const transcript = event.results[0][0].transcript;
+      setInput(transcript);
+      
+      const { createLocalNotification } = await import("@/utils/notifications");
+      createLocalNotification(
+        user,
+        token,
+        "Voice Transcription Completed",
+        `Voice query successfully transcribed: "${transcript.substring(0, 40)}..."`,
+        "success"
+      );
+    };
+
+    recognition.start();
+  };
+
+  const handleShareChat = async () => {
+    try {
+      const shareUrl = `${window.location.origin}/dashboard/copilot?session=${sessionId}`;
+      await navigator.clipboard.writeText(shareUrl);
+      alert("Chat session link copied to clipboard!");
+      
+      const { createLocalNotification } = await import("@/utils/notifications");
+      createLocalNotification(
+        user,
+        token,
+        "Chat Shared",
+        "Chat session link copied to clipboard successfully.",
+        "info"
+      );
+    } catch (e) {
+      console.error("Failed to copy link:", e);
+    }
+  };
 
   // Generate or fetch session ID on mount
   useEffect(() => {
@@ -123,26 +186,36 @@ export default function CopilotPage() {
       {/* Title Header */}
       <div className="flex justify-between items-center shrink-0">
         <div>
-          <h1 className="text-3xl font-extrabold text-white tracking-tight">AI Recruiter Copilot</h1>
-          <p className="text-zinc-400 text-sm mt-1">Ask questions about candidates, compare logs, and review strengths.</p>
+          <h1 className="text-3xl font-extrabold text-foreground tracking-tight">AI Recruiter Copilot</h1>
+          <p className="text-muted-foreground text-sm mt-1">Ask questions about candidates, compare logs, and review strengths.</p>
         </div>
-        <button
-          onClick={handleClearHistory}
-          className="inline-flex items-center space-x-2 px-3 py-1.5 border border-zinc-900 bg-zinc-900/40 hover:bg-zinc-900 hover:text-rose-400 text-xs text-zinc-500 rounded-lg transition-colors"
-          title="Clear Conversation History"
-        >
-          <Trash2 className="w-3.5 h-3.5" />
-          <span>Clear History</span>
-        </button>
+        <div className="flex space-x-3">
+          <button
+            onClick={handleShareChat}
+            className="inline-flex items-center space-x-2 px-3 py-1.5 border border-border bg-card hover:bg-secondary hover:text-indigo-500 text-xs text-muted-foreground rounded-lg transition-colors shadow-sm cursor-pointer"
+            title="Share Chat Session"
+          >
+            <Share2 className="w-3.5 h-3.5" />
+            <span>Share Chat</span>
+          </button>
+          <button
+            onClick={handleClearHistory}
+            className="inline-flex items-center space-x-2 px-3 py-1.5 border border-border bg-card hover:bg-secondary hover:text-rose-500 text-xs text-muted-foreground rounded-lg transition-colors shadow-sm cursor-pointer"
+            title="Clear Conversation History"
+          >
+            <Trash2 className="w-3.5 h-3.5" />
+            <span>Clear History</span>
+          </button>
+        </div>
       </div>
 
       {/* Main Work Area split */}
       <div className="flex-1 grid grid-cols-1 lg:grid-cols-4 gap-6 min-h-0 mb-4">
         
         {/* Left Side: Suggested Questions Panel */}
-        <div className="hidden lg:block glass border border-zinc-900 rounded-2xl p-6 overflow-y-auto">
-          <span className="block text-[10px] font-bold text-zinc-500 uppercase tracking-wider mb-4 flex items-center space-x-1.5">
-            <HelpCircle className="w-4 h-4 text-indigo-400" />
+        <div className="hidden lg:block glass rounded-2xl p-6 overflow-y-auto">
+          <span className="block text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-4 flex items-center space-x-1.5">
+            <HelpCircle className="w-4 h-4 text-indigo-500" />
             <span>Suggested Prompts</span>
           </span>
           <div className="space-y-2">
@@ -150,7 +223,7 @@ export default function CopilotPage() {
               <button
                 key={idx}
                 onClick={() => handleSend(q)}
-                className="w-full text-left p-3 border border-zinc-900 bg-zinc-900/10 hover:bg-zinc-900 hover:border-zinc-800 rounded-xl text-xs text-zinc-400 hover:text-white transition-all text-ellipsis overflow-hidden"
+                className="w-full text-left p-3 border border-border bg-card/50 hover:bg-secondary hover:border-indigo-500/30 rounded-xl text-xs text-muted-foreground hover:text-foreground transition-all text-ellipsis overflow-hidden shadow-sm"
               >
                 {q}
               </button>
@@ -159,7 +232,7 @@ export default function CopilotPage() {
         </div>
 
         {/* Center/Right: Chat Screen */}
-        <div className="lg:col-span-3 glass border border-zinc-900 rounded-2xl flex flex-col justify-between overflow-hidden">
+        <div className="lg:col-span-3 glass rounded-2xl flex flex-col justify-between overflow-hidden">
           
           {/* Scrollable messages area */}
           <div className="flex-1 overflow-y-auto p-6 space-y-6">
@@ -173,8 +246,8 @@ export default function CopilotPage() {
                 {/* Avatar Icon */}
                 <div className={`w-8.5 h-8.5 rounded-xl flex items-center justify-center shrink-0 border ${
                   msg.role === 'user'
-                    ? 'bg-zinc-900 border-zinc-800 text-zinc-300'
-                    : 'bg-indigo-600/15 border-indigo-500/20 text-indigo-400 shadow shadow-indigo-500/5'
+                    ? 'bg-card border-border text-foreground shadow-sm'
+                    : 'bg-indigo-600/15 border-indigo-500/20 text-indigo-500 shadow shadow-indigo-500/5'
                 }`}>
                   {msg.role === 'user' ? <User className="w-4.5 h-4.5" /> : <Cpu className="w-4.5 h-4.5 animate-pulse-slow" />}
                 </div>
@@ -183,8 +256,8 @@ export default function CopilotPage() {
                 <div className="space-y-4">
                   <div className={`p-4 rounded-2xl text-xs leading-relaxed border ${
                     msg.role === 'user'
-                      ? 'bg-zinc-900/60 border-zinc-800 text-white'
-                      : 'bg-zinc-950/20 border-zinc-900 text-zinc-300'
+                      ? 'bg-indigo-600/5 border-indigo-500/10 text-foreground'
+                      : 'bg-card border-border text-foreground shadow-sm'
                   }`}>
                     <p className="whitespace-pre-line">{msg.content}</p>
                   </div>
@@ -198,14 +271,14 @@ export default function CopilotPage() {
                           className="p-3 bg-indigo-500/5 border border-indigo-500/10 rounded-xl flex justify-between items-center text-xs hover:border-indigo-500 transition-colors"
                         >
                           <div>
-                            <span className="font-bold text-white block truncate max-w-[120px]">{c.name}</span>
-                            <span className="text-[10px] text-zinc-550 block mt-0.5 truncate max-w-[150px]">
+                            <span className="font-bold text-foreground block truncate max-w-[120px]">{c.name}</span>
+                            <span className="text-[10px] text-muted-foreground block mt-0.5 truncate max-w-[150px]">
                               {c.skills?.slice(0, 3).join(", ") || "No skills listed"}
                             </span>
                           </div>
                           <a 
                             href={`/dashboard/candidates`}
-                            className="p-1.5 bg-zinc-900 hover:bg-zinc-800 border border-zinc-850 rounded-lg text-indigo-400 hover:text-indigo-300"
+                            className="p-1.5 bg-card hover:bg-secondary border border-border rounded-lg text-indigo-500 hover:text-indigo-600 shadow-sm transition-colors"
                             title="Go to candidate details page"
                           >
                             <ArrowRight className="w-3.5 h-3.5" />
@@ -220,10 +293,10 @@ export default function CopilotPage() {
 
             {loading && (
               <div className="flex space-x-4 max-w-lg">
-                <div className="w-8.5 h-8.5 rounded-xl bg-indigo-600/15 border border-indigo-500/20 text-indigo-400 flex items-center justify-center shrink-0">
+                <div className="w-8.5 h-8.5 rounded-xl bg-indigo-600/15 border border-indigo-500/20 text-indigo-500 flex items-center justify-center shrink-0">
                   <Cpu className="w-4.5 h-4.5 animate-spin" />
                 </div>
-                <div className="p-4 bg-zinc-950/20 border border-zinc-900 rounded-2xl text-xs text-zinc-500 animate-pulse flex items-center space-x-2">
+                <div className="p-4 bg-card border border-border rounded-2xl text-xs text-muted-foreground animate-pulse flex items-center space-x-2 shadow-sm">
                   <span>Recruiter agent scanning database...</span>
                 </div>
               </div>
@@ -233,22 +306,32 @@ export default function CopilotPage() {
           </div>
 
           {/* Text Input Row */}
-          <div className="p-4 border-t border-zinc-900/60 bg-zinc-950/40">
+          <div className="p-4 border-t border-border bg-secondary/30">
             <form 
               onSubmit={(e) => { e.preventDefault(); handleSend(); }}
-              className="flex items-center space-x-3 bg-zinc-900 border border-zinc-800/80 focus-within:border-indigo-500/50 rounded-xl p-1.5 transition-all"
+              className="flex items-center space-x-3 bg-card border border-border focus-within:border-indigo-500 focus-within:ring-1 focus-within:ring-indigo-500 rounded-xl p-1.5 transition-all shadow-sm"
             >
               <input
                 type="text"
                 placeholder="Query candidate databases (e.g. 'Show candidates with python & 5 years experience')"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                className="flex-1 bg-transparent border-none text-xs text-white placeholder-zinc-600 outline-none px-3"
+                className="flex-1 bg-transparent border-none text-xs text-foreground placeholder-muted-foreground outline-none px-3"
               />
+              <button
+                type="button"
+                onClick={startSpeechRecognition}
+                className={`p-2.5 rounded-lg border border-border transition-colors flex items-center justify-center shrink-0 cursor-pointer ${
+                  recognizing ? "bg-red-500/20 border-red-500 text-red-500 animate-pulse" : "bg-card hover:bg-secondary text-muted-foreground hover:text-foreground"
+                }`}
+                title="Voice Search Query"
+              >
+                <Mic className="w-4 h-4" />
+              </button>
               <button
                 type="submit"
                 disabled={loading || !input.trim()}
-                className="p-2.5 bg-indigo-600 hover:bg-indigo-500 disabled:bg-zinc-850 disabled:text-zinc-650 text-white rounded-lg transition-colors flex items-center justify-center shrink-0"
+                className="p-2.5 bg-indigo-600 hover:bg-indigo-500 disabled:bg-secondary disabled:text-muted-foreground text-white rounded-lg transition-colors flex items-center justify-center shrink-0 cursor-pointer"
               >
                 <Send className="w-4 h-4" />
               </button>

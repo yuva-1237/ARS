@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from backend.app.api import auth, jobs, candidates, upload, copilot, analytics, settings
+from backend.app.api import auth, jobs, candidates, upload, copilot, analytics, settings, notifications
 
 api_router = APIRouter()
 
@@ -10,3 +10,5 @@ api_router.include_router(upload.router, prefix="/upload", tags=["Resume Upload"
 api_router.include_router(copilot.router, prefix="/copilot", tags=["AI Copilot Chat"])
 api_router.include_router(analytics.router, prefix="/analytics", tags=["Hiring Analytics"])
 api_router.include_router(settings.router, prefix="/settings", tags=["Platform Settings"])
+api_router.include_router(notifications.router, prefix="/notifications", tags=["Notifications"])
+

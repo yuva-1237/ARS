@@ -7,7 +7,7 @@ from backend.app.core.config import settings
 if settings.GEMINI_API_KEY:
     genai.configure(api_key=settings.GEMINI_API_KEY)
     
-def get_gemini_model(model_name: str = "gemini-1.5-flash"):
+def get_gemini_model(model_name: str = "gemini-2.5-flash"):
     if not settings.GEMINI_API_KEY:
         return None
     return genai.GenerativeModel(model_name)

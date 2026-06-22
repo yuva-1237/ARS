@@ -8,6 +8,7 @@ from backend.app.core.config import settings
 from backend.app.models import User
 from backend.app.schemas import UserCreate, UserOut, Token, UserUpdate
 from backend.app.api.deps import get_current_user
+from backend.app.services.firebase_service import send_notification_to_user
 
 router = APIRouter()
 
@@ -33,6 +34,13 @@ def signup(user_in: UserCreate, db: Session = Depends(get_db)):
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
+    send_notification_to_user(
+        new_user.id,
+        "New account created",
+        f"Welcome {new_user.full_name or new_user.email}! Your ARS account has been successfully initialized.",
+        "success",
+        db=db
+    )
     return new_user
 
 @router.post("/login", response_model=Token)
@@ -45,6 +53,14 @@ def login(
     """
     user = db.query(User).filter(User.email == form_data.username).first()
     if not user or not verify_password(form_data.password, user.hashed_password):
+        if user:
+            send_notification_to_user(
+                user.id,
+                "Security Alert: Failed Login",
+                "A failed login attempt was detected for your account.",
+                "warning",
+                db=db
+            )
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Incorrect email or password"
@@ -57,6 +73,13 @@ def login(
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
         subject=user.email, expires_delta=access_token_expires
+    )
+    send_notification_to_user(
+        user.id,
+        "User login",
+        "Successful login detected.",
+        "success",
+        db=db
     )
     return {
         "access_token": access_token,
@@ -81,6 +104,14 @@ def login_json(
     """
     user = db.query(User).filter(User.email == credentials.email).first()
     if not user or not verify_password(credentials.password, user.hashed_password):
+        if user:
+            send_notification_to_user(
+                user.id,
+                "Security Alert: Failed Login",
+                "A failed login attempt was detected for your account.",
+                "warning",
+                db=db
+            )
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Incorrect email or password"
@@ -93,6 +124,13 @@ def login_json(
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
         subject=user.email, expires_delta=access_token_expires
+    )
+    send_notification_to_user(
+        user.id,
+        "User login",
+        "Successful login detected.",
+        "success",
+        db=db
     )
     return {
         "access_token": access_token,
@@ -116,6 +154,9 @@ def update_user_me(
     """
     Update details of the current logged-in user.
     """
+    profile_updated = False
+    password_changed = False
+    
     if user_in.email is not None:
         if user_in.email != current_user.email:
             existing = db.query(User).filter(User.email == user_in.email).first()
@@ -125,18 +166,40 @@ def update_user_me(
                     detail="A user with this email address already exists."
                 )
             current_user.email = user_in.email
+            profile_updated = True
             
     if user_in.full_name is not None:
         current_user.full_name = user_in.full_name
+        profile_updated = True
         
     if user_in.password is not None:
         current_user.hashed_password = get_password_hash(user_in.password)
+        password_changed = True
         
     if user_in.role is not None:
         current_user.role = user_in.role
+        profile_updated = True
         
     db.commit()
     db.refresh(current_user)
+    
+    if password_changed:
+        send_notification_to_user(
+            current_user.id,
+            "Password Changed",
+            "Your account password was updated successfully.",
+            "warning",
+            db=db
+        )
+    elif profile_updated:
+        send_notification_to_user(
+            current_user.id,
+            "Profile Updated",
+            "Your profile details have been successfully updated.",
+            "success",
+            db=db
+        )
+        
     return current_user
 
 @router.post("/forgot-password")

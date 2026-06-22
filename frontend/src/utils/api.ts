@@ -24,12 +24,13 @@ api.interceptors.request.use(
   }
 );
 
-// Response interceptor to handle global errors (like token expiration)
+// Response interceptor: only redirect to /auth on 401 (token expired or missing)
+// 403 means insufficient role/permissions, NOT an auth failure — let pages handle those
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401 || error.response?.status === 403) {
-      // Clear authentication on token issues
+    if (error.response?.status === 401) {
+      // Token is invalid or expired — clear auth and redirect to login
       useStore.getState().clearAuth();
       if (typeof window !== "undefined") {
         window.location.href = "/auth";

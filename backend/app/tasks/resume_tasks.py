@@ -2,9 +2,10 @@ import os
 import logging
 from sqlalchemy.orm import Session
 from backend.app.core.database import SessionLocal
-from backend.app.models import Resume, Candidate, CandidateScore, JobDescription, InterviewQuestion, Notification
+from backend.app.models import Resume, Candidate, CandidateScore, JobDescription, InterviewQuestion, Notification, User
 from backend.app.services.gemini_service import parse_resume_text, match_candidate_to_job, detect_resume_fraud, generate_interview_questions
 from backend.app.services.rag_service import rag_service
+from backend.app.services.firebase_service import send_notification_to_user
 
 logger = logging.getLogger(__name__)
 
@@ -125,6 +126,18 @@ def process_resume_workflow(resume_id: int, job_ids: list = None):
             
         resume.raw_text = raw_text
         db.commit()
+        
+        is_image = any(img_type in resume.file_type.lower() for img_type in ["image", "png", "jpg", "jpeg"])
+        if is_image:
+            first_user = db.query(User).first()
+            target_user_id = first_user.id if first_user else 1
+            send_notification_to_user(
+                db_user_id=target_user_id,
+                title="Image Analysis Completed",
+                message=f"OCR analysis finished successfully for scanned resume '{resume.file_name}'.",
+                notification_type="success",
+                db=db
+            )
 
         # Step 2: AI Parse
         logger.info(f"Calling Gemini to parse resume {resume_id}...")
@@ -206,14 +219,50 @@ def process_resume_workflow(resume_id: int, job_ids: list = None):
                 existing_score = CandidateScore(candidate_id=candidate.id, job_id=job_id)
                 db.add(existing_score)
                 
-            existing_score.overall_score = match_results.get("overall_score", 0.0)
-            existing_score.skill_score = match_results.get("skill_score", 0.0)
-            existing_score.experience_score = match_results.get("experience_score", 0.0)
-            existing_score.education_score = match_results.get("education_score", 0.0)
-            existing_score.certification_score = match_results.get("certification_score", 0.0)
-            existing_score.project_score = match_results.get("project_score", 0.0)
-            existing_score.keyword_score = match_results.get("keyword_score", 0.0)
-            existing_score.semantic_score = match_results.get("semantic_score", 0.0)
+            # Get match sub-scores from LLM results
+            s_score = match_results.get("skill_score", 0.0)
+            e_score = match_results.get("experience_score", 0.0)
+            ed_score = match_results.get("education_score", 0.0)
+            c_score = match_results.get("certification_score", 0.0)
+            p_score = match_results.get("project_score", 0.0)
+            k_score = match_results.get("keyword_score", 0.0)
+            se_score = match_results.get("semantic_score", 0.0)
+
+            # Load configured scoring weights from settings
+            from backend.app.api.settings import load_local_settings
+            local_settings = load_local_settings()
+            weights = local_settings.get("scoring_weights", {})
+            
+            skill_w = weights.get("skill_weight", 0.25)
+            exp_w = weights.get("experience_weight", 0.25)
+            edu_w = weights.get("education_weight", 0.15)
+            cert_w = weights.get("certification_weight", 0.10)
+            proj_w = weights.get("project_weight", 0.10)
+            key_w = weights.get("keyword_weight", 0.05)
+            sem_w = weights.get("semantic_weight", 0.10)
+            
+            total_w = skill_w + exp_w + edu_w + cert_w + proj_w + key_w + sem_w
+            if total_w > 0:
+                weighted_score = (
+                    (s_score * skill_w) +
+                    (e_score * exp_w) +
+                    (ed_score * edu_w) +
+                    (c_score * cert_w) +
+                    (p_score * proj_w) +
+                    (k_score * key_w) +
+                    (se_score * sem_w)
+                ) / total_w
+            else:
+                weighted_score = match_results.get("overall_score", 0.0)
+                
+            existing_score.overall_score = round(float(weighted_score), 1)
+            existing_score.skill_score = round(float(s_score), 1)
+            existing_score.experience_score = round(float(e_score), 1)
+            existing_score.education_score = round(float(ed_score), 1)
+            existing_score.certification_score = round(float(c_score), 1)
+            existing_score.project_score = round(float(p_score), 1)
+            existing_score.keyword_score = round(float(k_score), 1)
+            existing_score.semantic_score = round(float(se_score), 1)
             existing_score.explanation = match_results.get("explanation", "")
             existing_score.confidence_score = match_results.get("confidence_score", 0.0)
             
@@ -253,14 +302,15 @@ def process_resume_workflow(resume_id: int, job_ids: list = None):
         db.commit()
         
         # Create user notification
-        notif = Notification(
-            user_id=1,  # Send to primary user (in multi-user this is the recruiter who uploaded it)
-            title="Resume Parsing Complete",
+        first_user = db.query(User).first()
+        target_user_id = first_user.id if first_user else 1
+        send_notification_to_user(
+            db_user_id=target_user_id,
+            title="File Processing Completed",
             message=f"Candidate {candidate.first_name} {candidate.last_name}'s resume has been screened successfully.",
-            notification_type="processing_complete"
+            notification_type="success",
+            db=db
         )
-        db.add(notif)
-        db.commit()
         
         # Calculate ranks across scored candidates for these jobs
         _recalculate_ranks_for_jobs(db, job_ids)
@@ -270,6 +320,20 @@ def process_resume_workflow(resume_id: int, job_ids: list = None):
         
     except Exception as e:
         logger.error(f"Error in process_resume_workflow for resume {resume_id}: {e}", exc_info=True)
+        try:
+            first_user = db.query(User).first()
+            target_user_id = first_user.id if first_user else 1
+            resume_obj = db.query(Resume).filter(Resume.id == resume_id).first()
+            file_name = resume_obj.file_name if resume_obj else f"ID {resume_id}"
+            send_notification_to_user(
+                db_user_id=target_user_id,
+                title="Resume Processing Failed",
+                message=f"An error occurred while parsing resume '{file_name}'. Please verify the document format.",
+                notification_type="error",
+                db=db
+            )
+        except Exception as notif_err:
+            logger.error(f"Failed to send error notification: {notif_err}")
         # Attempt to mark failed
         try:
             resume = db.query(Resume).filter(Resume.id == resume_id).first()

@@ -170,8 +170,8 @@ export default function UploadPage() {
       
       {/* Title block */}
       <div>
-        <h1 className="text-3xl font-extrabold text-white tracking-tight">Resume Intake</h1>
-        <p className="text-zinc-400 text-sm mt-1">Upload resumes in bulk. Scanned resumes are processed via Tesseract OCR.</p>
+        <h1 className="text-3xl font-extrabold text-foreground tracking-tight">Resume Intake</h1>
+        <p className="text-muted-foreground text-sm mt-1">Upload resumes in bulk. Scanned resumes are processed via Tesseract OCR.</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -180,19 +180,19 @@ export default function UploadPage() {
         <div className="lg:col-span-2 space-y-6">
           
           {/* Target Job Selector */}
-          <div className="glass border border-zinc-900 rounded-2xl p-6">
-            <h3 className="text-sm font-bold text-white mb-2.5 flex items-center space-x-2">
-              <Briefcase className="w-4 h-4 text-indigo-400" />
+          <div className="glass border border-border rounded-2xl p-6 shadow-sm">
+            <h3 className="text-sm font-bold text-foreground mb-2.5 flex items-center space-x-2">
+              <Briefcase className="w-4 h-4 text-indigo-500" />
               <span>Link Uploads to Job Positions (Optional)</span>
             </h3>
-            <p className="text-xs text-zinc-500 mb-4">
+            <p className="text-xs text-muted-foreground mb-4">
               Select one or more active openings to calculate candidate matching scores immediately upon upload.
             </p>
             
             {jobsLoading ? (
-              <div className="h-10 bg-zinc-900 rounded animate-pulse" />
+              <div className="h-10 bg-secondary rounded animate-pulse" />
             ) : jobs.length === 0 ? (
-              <div className="text-xs text-zinc-650 italic">No active jobs found. Create jobs first.</div>
+              <div className="text-xs text-muted-foreground italic">No active jobs found. Create jobs first.</div>
             ) : (
               <div className="flex flex-wrap gap-2">
                 {jobs.map((job) => {
@@ -202,10 +202,10 @@ export default function UploadPage() {
                       key={job.id}
                       type="button"
                       onClick={() => handleJobSelect(job.id)}
-                      className={`py-1.5 px-3 border rounded-lg text-xs font-semibold transition-all ${
+                      className={`py-1.5 px-3 border rounded-lg text-xs font-semibold transition-all cursor-pointer ${
                         isSelected
-                          ? "bg-indigo-600/15 border-indigo-500 text-indigo-300 shadow shadow-indigo-500/10"
-                          : "bg-zinc-900/30 border-zinc-850 text-zinc-500 hover:text-zinc-300"
+                          ? "bg-indigo-600/15 border-indigo-500 text-indigo-650 dark:text-indigo-300 shadow shadow-indigo-500/10"
+                          : "bg-secondary/30 border-border text-muted-foreground hover:text-foreground"
                       }`}
                     >
                       {job.title}
@@ -222,46 +222,46 @@ export default function UploadPage() {
             className={`border-2 border-dashed rounded-2xl p-12 text-center cursor-pointer transition-all duration-200 ${
               isDragActive 
                 ? "border-indigo-500 bg-indigo-500/5" 
-                : "border-zinc-800 bg-zinc-900/10 hover:border-zinc-700 hover:bg-zinc-900/20"
+                : "border-border bg-secondary/10 hover:border-indigo-500/30 hover:bg-secondary/20"
             }`}
           >
             <input {...(getInputProps() as any)} />
-            <UploadCloud className="w-12 h-12 text-zinc-500 mx-auto mb-4 animate-bounce" />
-            <h3 className="text-lg font-bold text-white mb-1">Drag & Drop Resumes here</h3>
-            <p className="text-zinc-500 text-xs max-w-sm mx-auto mb-2">
+            <UploadCloud className="w-12 h-12 text-muted-foreground mx-auto mb-4 animate-bounce" />
+            <h3 className="text-lg font-bold text-foreground mb-1">Drag & Drop Resumes here</h3>
+            <p className="text-muted-foreground text-xs max-w-sm mx-auto mb-2">
               Supports PDF, DOCX, TXT, PNG, JPG, or JPEG formats.
             </p>
-            <span className="text-[10px] text-zinc-600 uppercase font-bold tracking-wider">or click to browse files</span>
+            <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">or click to browse files</span>
           </div>
 
         </div>
 
         {/* Right: Upload Queue list */}
-        <div className="glass border border-zinc-900 rounded-2xl p-6 flex flex-col justify-between min-h-[400px]">
+        <div className="glass border border-border rounded-2xl p-6 flex flex-col justify-between min-h-[400px] shadow-sm">
           <div className="space-y-4">
-            <div className="flex justify-between items-center border-b border-zinc-900 pb-3 mb-4">
-              <span className="text-xs font-bold text-white uppercase tracking-wider">Upload Queue</span>
-              <span className="text-[10px] text-zinc-500 font-bold">{queue.length} Files</span>
+            <div className="flex justify-between items-center border-b border-border pb-3 mb-4">
+              <span className="text-xs font-bold text-foreground uppercase tracking-wider">Upload Queue</span>
+              <span className="text-[10px] text-muted-foreground font-bold">{queue.length} Files</span>
             </div>
 
             <div className="space-y-3 max-h-[300px] overflow-y-auto pr-1">
               {queue.length === 0 ? (
-                <div className="text-center text-xs text-zinc-600 py-12">Queue is empty. Drop files on the left to start.</div>
+                <div className="text-center text-xs text-muted-foreground py-12">Queue is empty. Drop files on the left to start.</div>
               ) : (
                 queue.map((item) => (
-                  <div key={item.id} className="p-3 bg-zinc-900/40 border border-zinc-900 rounded-xl relative">
+                  <div key={item.id} className="p-3 bg-secondary/30 border border-border rounded-xl relative shadow-sm">
                     
                     {/* Header info */}
                     <div className="flex justify-between items-start">
                       <div className="flex items-center space-x-2.5 min-w-0">
-                        <FileText className="w-4 h-4 text-indigo-400 shrink-0" />
-                        <span className="text-xs text-white truncate font-semibold pr-2">{item.file.name}</span>
+                        <FileText className="w-4 h-4 text-indigo-500 shrink-0" />
+                        <span className="text-xs text-foreground truncate font-semibold pr-2">{item.file.name}</span>
                       </div>
                       
                       {item.status === "pending" && (
                         <button 
                           onClick={() => removeQueueItem(item.id)}
-                          className="text-zinc-500 hover:text-white"
+                          className="text-muted-foreground hover:text-foreground cursor-pointer"
                         >
                           <X className="w-3.5 h-3.5" />
                         </button>
@@ -271,17 +271,17 @@ export default function UploadPage() {
                     {/* Progress Bar & Status */}
                     <div className="mt-3.5 flex justify-between items-center text-[10px] font-bold">
                       <span className={`uppercase tracking-wider ${
-                        item.status === 'parsed' ? 'text-emerald-400' :
-                        item.status === 'failed' ? 'text-rose-400' :
-                        item.status === 'processing' ? 'text-indigo-400' : 'text-zinc-500'
+                        item.status === 'parsed' ? 'text-emerald-500' :
+                        item.status === 'failed' ? 'text-rose-500' :
+                        item.status === 'processing' ? 'text-indigo-500' : 'text-muted-foreground'
                       }`}>
                         {item.status}
                       </span>
-                      <span className="text-zinc-600">{(item.file.size / 1024).toFixed(0)} KB</span>
+                      <span className="text-muted-foreground">{(item.file.size / 1024).toFixed(0)} KB</span>
                     </div>
 
                     {item.status === "uploading" && (
-                      <div className="w-full bg-zinc-800 h-1 rounded-full overflow-hidden mt-2">
+                      <div className="w-full bg-secondary h-1 rounded-full overflow-hidden mt-2">
                         <div className="bg-indigo-500 h-1 transition-all duration-300" style={{ width: `${item.progress}%` }} />
                       </div>
                     )}
@@ -293,7 +293,7 @@ export default function UploadPage() {
                     )}
 
                     {item.error && (
-                      <span className="text-[9px] text-rose-400 font-medium block mt-1">{item.error}</span>
+                      <span className="text-[9px] text-rose-500 font-medium block mt-1">{item.error}</span>
                     )}
 
                   </div>
@@ -306,7 +306,7 @@ export default function UploadPage() {
             <button
               onClick={triggerUpload}
               disabled={uploading || queue.every(i => i.status !== 'pending')}
-              className="w-full mt-6 py-3 bg-indigo-600 hover:bg-indigo-500 disabled:bg-zinc-800 disabled:text-zinc-500 text-white font-semibold rounded-xl text-xs transition-all flex items-center justify-center space-x-2"
+              className="w-full mt-6 py-3 bg-indigo-600 hover:bg-indigo-500 disabled:bg-secondary disabled:text-muted-foreground text-white font-semibold rounded-xl text-xs transition-all flex items-center justify-center space-x-2 cursor-pointer shadow-sm"
             >
               {uploading ? (
                 <>

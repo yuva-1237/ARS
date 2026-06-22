@@ -50,6 +50,8 @@ httpx
 # Authentication
 python-jose[cryptography]
 passlib[bcrypt]
+firebase-admin
+
 
 # File Handling
 aiofiles

@@ -210,6 +210,13 @@ class NotificationOut(BaseModel):
     class Config:
         from_attributes = True
 
+class AnnouncementRequest(BaseModel):
+    title: str
+    message: str
+    action_url: Optional[str] = None
+    metadata: Optional[Dict[str, Any]] = None
+
+
 
 # ==========================================
 # CONFIGURATION & SETTINGS SCHEMAS

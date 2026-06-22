@@ -1,10 +1,11 @@
+import os
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 from sqlalchemy import or_
 from typing import List, Optional
 from backend.app.core.database import get_db
-from backend.app.models import Candidate, CandidateScore, InterviewQuestion, Resume, User
+from backend.app.models import Candidate, CandidateScore, InterviewQuestion, Resume, User, JobDescription
 from backend.app.schemas import CandidateOut, CandidateDetailOut, CandidateScoreOut, InterviewQuestionOut
 from backend.app.api.deps import get_current_user, RoleChecker
 
@@ -163,6 +164,48 @@ def get_candidate_score(
             detail="Score record not found. Ensure candidate has been screened for this job."
         )
     return score
+
+@router.get("/{candidate_id}/scores")
+def get_candidate_all_scores(
+    candidate_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Get all job match scores for a candidate, including job titles.
+    """
+    results = db.query(CandidateScore, JobDescription).join(
+        JobDescription, CandidateScore.job_id == JobDescription.id
+    ).filter(
+        CandidateScore.candidate_id == candidate_id
+    ).all()
+    
+    scores = []
+    for score, job in results:
+        scores.append({
+            "id": score.id,
+            "candidate_id": score.candidate_id,
+            "job_id": score.job_id,
+            "job_title": job.title,
+            "overall_score": score.overall_score,
+            "skill_score": score.skill_score,
+            "experience_score": score.experience_score,
+            "education_score": score.education_score,
+            "certification_score": score.certification_score,
+            "project_score": score.project_score,
+            "keyword_score": score.keyword_score,
+            "semantic_score": score.semantic_score,
+            "explanation": score.explanation,
+            "confidence_score": score.confidence_score,
+            "ranked_position": score.ranked_position,
+            "fraud_risk_score": score.fraud_risk_score,
+            "fraud_risk_report": score.fraud_risk_report,
+            "ai_summary": score.ai_summary,
+            "strengths": score.strengths,
+            "weaknesses": score.weaknesses,
+            "created_at": score.created_at
+        })
+    return scores
 
 @router.put("/{candidate_id}/status")
 def update_candidate_status(

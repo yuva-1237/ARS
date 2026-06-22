@@ -1,15 +1,23 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   ArrowRight, CheckCircle2, ChevronDown, Sparkles, Shield, 
-  Cpu, Users, BarChart3, CloudLightning, MessageSquareText 
+  Cpu, Users, BarChart3, CloudLightning, MessageSquareText,
+  Sun, Moon
 } from "lucide-react";
+import { useStore } from "@/store/useStore";
 
 export default function LandingPage() {
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
+  const { theme, toggleTheme } = useStore();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const toggleFaq = (index: number) => {
     setActiveFaq(activeFaq === index ? null : index);
@@ -108,6 +116,15 @@ export default function LandingPage() {
           </nav>
 
           <div className="flex items-center space-x-4">
+            {mounted && (
+              <button
+                onClick={toggleTheme}
+                className="w-9 h-9 rounded-lg border border-zinc-800/50 hover:border-zinc-700/50 flex items-center justify-center text-zinc-400 hover:text-white transition-colors cursor-pointer"
+                title="Toggle Theme"
+              >
+                {theme === "light" ? <Moon className="w-4.5 h-4.5" /> : <Sun className="w-4.5 h-4.5" />}
+              </button>
+            )}
             <Link href="/auth" className="text-sm font-medium text-zinc-400 hover:text-white transition-colors">
               Sign In
             </Link>

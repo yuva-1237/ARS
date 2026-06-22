@@ -6,6 +6,7 @@ from backend.app.models import ChatHistory, User
 from backend.app.schemas import ChatRequest, ChatResponse, ChatMessage
 from backend.app.api.deps import get_current_user
 from backend.app.services.rag_service import rag_service
+from backend.app.services.firebase_service import send_notification_to_user
 
 router = APIRouter()
 
@@ -50,6 +51,13 @@ def copilot_chat(
     )
     db.add(assistant_msg)
     db.commit()
+    send_notification_to_user(
+        current_user.id,
+        "AI Response Completed",
+        f"Copilot has completed the screening analysis: \"{payload.message[:50]}...\"",
+        "info",
+        db=db
+    )
     
     return {
         "answer": result["answer"],
@@ -69,7 +77,13 @@ def get_chat_history(
     history = db.query(ChatHistory).filter(
         ChatHistory.session_id == session_id
     ).order_by(ChatHistory.created_at.asc()).all()
-    return history
+    return [
+        ChatMessage(
+            role=h.role,
+            content=h.message_text,
+            created_at=h.created_at
+        ) for h in history
+    ]
 
 @router.delete("/history/{session_id}", status_code=status.HTTP_204_NO_CONTENT)
 def clear_chat_history(

@@ -94,12 +94,12 @@ export default function JobsPage() {
       {/* Title block */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-extrabold text-white tracking-tight">Active Jobs</h1>
-          <p className="text-zinc-400 text-sm mt-1">Define requirements and coordinate AI screening weights.</p>
+          <h1 className="text-3xl font-extrabold text-foreground tracking-tight">Active Jobs</h1>
+          <p className="text-muted-foreground text-sm mt-1">Define requirements and coordinate AI screening weights.</p>
         </div>
         <button
           onClick={() => setFormOpen(!formOpen)}
-          className="inline-flex items-center space-x-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-lg transition-all hover:shadow-lg hover:shadow-indigo-500/20 active:scale-[0.98]"
+          className="inline-flex items-center space-x-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-lg transition-all hover:shadow-lg hover:shadow-indigo-500/20 active:scale-[0.98] cursor-pointer"
         >
           <Plus className="w-4 h-4" />
           <span>New Job Opening</span>
@@ -108,7 +108,7 @@ export default function JobsPage() {
 
       {/* Messages */}
       {message && (
-        <div className="flex items-center space-x-2 bg-indigo-500/10 border border-indigo-500/20 rounded-lg p-3 text-indigo-300 text-xs">
+        <div className="flex items-center space-x-2 bg-indigo-500/10 border border-indigo-500/20 text-indigo-500 font-bold px-3 py-1.5 rounded-full inline-flex">
           <Sparkles className="w-4 h-4 flex-shrink-0 animate-spin" />
           <span>{message}</span>
         </div>
@@ -116,10 +116,10 @@ export default function JobsPage() {
 
       {/* New Job Form */}
       {formOpen && (
-        <div className="glass border border-zinc-900 rounded-2xl p-6 shadow-2xl animate-float">
+        <div className="glass border border-border rounded-2xl p-6 shadow-2xl animate-float">
           <div className="flex justify-between items-center mb-6">
-            <h3 className="text-lg font-bold text-white">Create New Job Description</h3>
-            <button onClick={() => setFormOpen(false)} className="text-zinc-500 hover:text-white text-xs font-bold">
+            <h3 className="text-lg font-bold text-foreground">Create New Job Description</h3>
+            <button onClick={() => setFormOpen(false)} className="text-muted-foreground hover:text-foreground text-xs font-bold cursor-pointer">
               Cancel
             </button>
           </div>
@@ -127,47 +127,47 @@ export default function JobsPage() {
           <form onSubmit={handleCreateJob} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <label className="block text-[10px] font-bold text-zinc-500 uppercase tracking-wider mb-2">Job Title</label>
+                <label className="block text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-2">Job Title</label>
                 <input
                   type="text"
                   required
                   placeholder="e.g. Senior Backend Engineer"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  className="w-full bg-zinc-950/50 border border-zinc-800 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 rounded-lg py-2.5 px-4 text-xs text-white placeholder-zinc-650 outline-none transition-all"
+                  className="w-full bg-background/50 border border-border focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 rounded-lg py-2.5 px-4 text-xs text-foreground placeholder-muted-foreground outline-none transition-all shadow-sm"
                 />
               </div>
               <div>
-                <label className="block text-[10px] font-bold text-zinc-500 uppercase tracking-wider mb-2">Department</label>
+                <label className="block text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-2">Department</label>
                 <input
                   type="text"
                   placeholder="e.g. Engineering"
                   value={department}
                   onChange={(e) => setDepartment(e.target.value)}
-                  className="w-full bg-zinc-950/50 border border-zinc-800 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 rounded-lg py-2.5 px-4 text-xs text-white placeholder-zinc-650 outline-none transition-all"
+                  className="w-full bg-background/50 border border-border focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 rounded-lg py-2.5 px-4 text-xs text-foreground placeholder-muted-foreground outline-none transition-all shadow-sm"
                 />
               </div>
               <div>
-                <label className="block text-[10px] font-bold text-zinc-500 uppercase tracking-wider mb-2">Location</label>
+                <label className="block text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-2">Location</label>
                 <input
                   type="text"
                   placeholder="e.g. San Francisco, CA (Hybrid)"
                   value={location}
                   onChange={(e) => setLocation(e.target.value)}
-                  className="w-full bg-zinc-950/50 border border-zinc-800 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 rounded-lg py-2.5 px-4 text-xs text-white placeholder-zinc-650 outline-none transition-all"
+                  className="w-full bg-background/50 border border-border focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 rounded-lg py-2.5 px-4 text-xs text-foreground placeholder-muted-foreground outline-none transition-all shadow-sm"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-[10px] font-bold text-zinc-500 uppercase tracking-wider mb-2">Full Job Description</label>
+              <label className="block text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-2">Full Job Description</label>
               <textarea
                 required
                 rows={6}
                 placeholder="Paste the raw text job description here. Our Gemini agent will automatically parse it to extract required skills, experience, education, responsibilities, and target search keywords."
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                className="w-full bg-zinc-950/50 border border-zinc-800 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 rounded-lg py-2.5 px-4 text-xs text-white placeholder-zinc-650 outline-none transition-all resize-none"
+                className="w-full bg-background/50 border border-border focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 rounded-lg py-2.5 px-4 text-xs text-foreground placeholder-muted-foreground outline-none transition-all resize-none shadow-sm"
               />
             </div>
 
@@ -175,7 +175,7 @@ export default function JobsPage() {
               <button
                 type="submit"
                 disabled={saving}
-                className="inline-flex items-center space-x-2 px-6 py-3 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-lg transition-all"
+                className="inline-flex items-center space-x-2 px-6 py-3 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-lg transition-all cursor-pointer"
               >
                 {saving ? (
                   <div className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
@@ -195,17 +195,17 @@ export default function JobsPage() {
       {loading ? (
         <div className="space-y-4">
           {[1, 2].map((i) => (
-            <div key={i} className="h-24 bg-zinc-900 border border-zinc-800/50 rounded-2xl animate-pulse" />
+            <div key={i} className="h-24 bg-card border border-border rounded-2xl animate-pulse" />
           ))}
         </div>
       ) : jobs.length === 0 ? (
-        <div className="glass border border-zinc-900 rounded-2xl p-12 text-center">
-          <Briefcase className="w-10 h-10 text-zinc-600 mx-auto mb-4" />
-          <h3 className="text-lg font-bold text-white mb-1">No jobs defined yet</h3>
-          <p className="text-zinc-500 text-sm max-w-sm mx-auto mb-6">Create a job opening to start matching candidates against specific parameters.</p>
+        <div className="glass border border-border rounded-2xl p-12 text-center shadow-sm">
+          <Briefcase className="w-10 h-10 text-muted-foreground mx-auto mb-4" />
+          <h3 className="text-lg font-bold text-foreground mb-1">No jobs defined yet</h3>
+          <p className="text-muted-foreground text-sm max-w-sm mx-auto mb-6">Create a job opening to start matching candidates against specific parameters.</p>
           <button 
             onClick={() => setFormOpen(true)}
-            className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-lg"
+            className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-lg cursor-pointer"
           >
             Create Your First Job
           </button>
@@ -217,19 +217,19 @@ export default function JobsPage() {
             return (
               <div 
                 key={job.id}
-                className="glass border border-zinc-900 rounded-2xl overflow-hidden transition-all hover:border-zinc-850"
+                className="glass border border-border rounded-2xl overflow-hidden transition-all hover:border-indigo-500/50 shadow-sm"
               >
                 <div 
                   onClick={() => toggleExpand(job.id)}
-                  className="p-6 flex items-center justify-between cursor-pointer hover:bg-zinc-900/10"
+                  className="p-6 flex items-center justify-between cursor-pointer hover:bg-secondary/40"
                 >
                   <div className="flex items-center space-x-4">
-                    <div className="w-10 h-10 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center text-indigo-400">
+                    <div className="w-10 h-10 rounded-xl bg-secondary border border-border flex items-center justify-center text-indigo-500 shadow-sm">
                       <Briefcase className="w-5 h-5" />
                     </div>
                     <div>
-                      <h3 className="text-base font-bold text-white">{job.title}</h3>
-                      <div className="flex items-center space-x-4 text-xs text-zinc-500 mt-1">
+                      <h3 className="text-base font-bold text-foreground">{job.title}</h3>
+                      <div className="flex items-center space-x-4 text-xs text-muted-foreground mt-1">
                         {job.department && <span>{job.department}</span>}
                         {job.location && (
                           <span className="flex items-center space-x-1">
@@ -237,7 +237,7 @@ export default function JobsPage() {
                             <span>{job.location}</span>
                           </span>
                         )}
-                        <span className="text-[10px] font-semibold text-emerald-400 capitalize px-2 py-0.5 rounded-full bg-emerald-500/5 border border-emerald-500/10">
+                        <span className="text-[10px] font-semibold text-emerald-500 capitalize px-2 py-0.5 rounded-full bg-emerald-500/5 border border-emerald-500/10">
                           {job.status}
                         </span>
                       </div>
@@ -247,24 +247,24 @@ export default function JobsPage() {
                   <div className="flex items-center space-x-3">
                     <button
                       onClick={(e) => { e.stopPropagation(); handleRecalculate(job.id); }}
-                      className="p-2 border border-zinc-800 bg-zinc-900/40 hover:bg-zinc-900 rounded-lg text-zinc-400 hover:text-white transition-colors"
+                      className="p-2 border border-border bg-card hover:bg-secondary rounded-lg text-muted-foreground hover:text-foreground transition-colors cursor-pointer shadow-sm"
                       title="Recalculate Candidate Matching Scores"
                     >
                       <RefreshCw className="w-3.5 h-3.5" />
                     </button>
                     <button
                       onClick={(e) => { e.stopPropagation(); handleArchive(job.id); }}
-                      className="p-2 border border-zinc-900 bg-zinc-900/40 hover:bg-zinc-900 rounded-lg text-zinc-400 hover:text-rose-400 transition-colors"
+                      className="p-2 border border-border bg-card hover:bg-secondary rounded-lg text-muted-foreground hover:text-rose-500 transition-colors cursor-pointer shadow-sm"
                       title="Archive Job"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
-                    {isExpanded ? <ChevronUp className="w-4 h-4 text-zinc-500" /> : <ChevronDown className="w-4 h-4 text-zinc-500" />}
+                    {isExpanded ? <ChevronUp className="w-4 h-4 text-muted-foreground" /> : <ChevronDown className="w-4 h-4 text-muted-foreground" />}
                   </div>
                 </div>
 
                 {isExpanded && (
-                  <div className="px-6 pb-6 border-t border-zinc-900/50 pt-6 bg-zinc-950/20 text-xs leading-relaxed space-y-6">
+                  <div className="px-6 pb-6 border-t border-border pt-6 bg-secondary/20 text-xs leading-relaxed space-y-6">
                     
                     {/* Grid of AI Extracted features */}
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -272,23 +272,23 @@ export default function JobsPage() {
                       {/* Left: Skills & Education */}
                       <div className="space-y-4">
                         <div>
-                          <span className="block text-[10px] font-bold text-zinc-500 uppercase tracking-wider mb-2">Required Skills</span>
+                          <span className="block text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-2">Required Skills</span>
                           <div className="flex flex-wrap gap-1.5">
                             {job.required_skills?.length > 0 ? (
                               job.required_skills.map((s: string, idx: number) => (
-                                <span key={idx} className="px-2 py-1 bg-indigo-500/5 border border-indigo-500/10 text-indigo-300 rounded font-semibold">
+                                <span key={idx} className="px-2 py-1 bg-indigo-500/5 border border-indigo-500/10 text-indigo-600 dark:text-indigo-300 rounded font-semibold shadow-sm">
                                   {s}
                                 </span>
                               ))
                             ) : (
-                              <span className="text-zinc-600">Pending AI extraction...</span>
+                              <span className="text-muted-foreground">Pending AI extraction...</span>
                             )}
                           </div>
                         </div>
 
                         <div>
-                          <span className="block text-[10px] font-bold text-zinc-500 uppercase tracking-wider mb-2">Education Requirements</span>
-                          <span className="text-zinc-300 font-medium block">
+                          <span className="block text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-2">Education Requirements</span>
+                          <span className="text-foreground font-medium block">
                             {job.education_requirements || "Not specified"}
                           </span>
                         </div>
@@ -297,23 +297,23 @@ export default function JobsPage() {
                       {/* Middle: Key details & Keywords */}
                       <div className="space-y-4">
                         <div>
-                          <span className="block text-[10px] font-bold text-zinc-500 uppercase tracking-wider mb-2">Experience (Years)</span>
-                          <span className="text-zinc-300 font-medium text-sm">
+                          <span className="block text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-2">Experience (Years)</span>
+                          <span className="text-foreground font-medium text-sm">
                             {job.experience_years ? `${job.experience_years}+ years` : "No experience cap specified"}
                           </span>
                         </div>
 
                         <div>
-                          <span className="block text-[10px] font-bold text-zinc-500 uppercase tracking-wider mb-2">AI Search Keywords</span>
+                          <span className="block text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-2">AI Search Keywords</span>
                           <div className="flex flex-wrap gap-1.5">
                             {job.keywords?.length > 0 ? (
                               job.keywords.map((k: string, idx: number) => (
-                                <span key={idx} className="px-2 py-1 bg-zinc-900 border border-zinc-800 text-zinc-400 rounded">
+                                <span key={idx} className="px-2 py-1 bg-card border border-border text-muted-foreground rounded shadow-sm">
                                   {k}
                                 </span>
                               ))
                             ) : (
-                              <span className="text-zinc-650">Pending...</span>
+                              <span className="text-muted-foreground">Pending...</span>
                             )}
                           </div>
                         </div>
@@ -321,14 +321,14 @@ export default function JobsPage() {
 
                       {/* Right: Responsibilities */}
                       <div>
-                        <span className="block text-[10px] font-bold text-zinc-500 uppercase tracking-wider mb-2">Responsibilities</span>
-                        <ul className="space-y-1.5 text-zinc-400 list-disc list-inside">
+                        <span className="block text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-2">Responsibilities</span>
+                        <ul className="space-y-1.5 text-muted-foreground list-disc list-inside">
                           {job.responsibilities?.length > 0 ? (
                             job.responsibilities.slice(0, 4).map((r: string, idx: number) => (
                               <li key={idx} className="truncate">{r}</li>
                             ))
                           ) : (
-                            <span className="text-zinc-605">Pending...</span>
+                            <span className="text-muted-foreground">Pending...</span>
                           )}
                         </ul>
                       </div>
@@ -336,8 +336,8 @@ export default function JobsPage() {
 
                     {/* Original description */}
                     <div>
-                      <span className="block text-[10px] font-bold text-zinc-500 uppercase tracking-wider mb-2">Full Description</span>
-                      <p className="text-zinc-400 whitespace-pre-line bg-zinc-900/20 border border-zinc-900/50 p-4 rounded-xl max-h-48 overflow-y-auto">
+                      <span className="block text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-2">Full Description</span>
+                      <p className="text-muted-foreground whitespace-pre-line bg-secondary/20 border border-border p-4 rounded-xl max-h-48 overflow-y-auto">
                         {job.description}
                       </p>
                     </div>

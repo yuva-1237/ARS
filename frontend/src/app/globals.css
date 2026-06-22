@@ -1,55 +1,55 @@
 @import "tailwindcss";
 
 :root {
-  --background: #fafafa;
-  --foreground: #09090b;
-  --card: #ffffff;
-  --card-foreground: #09090b;
-  --popover: #ffffff;
-  --popover-foreground: #09090b;
-  --primary: #6366f1;
-  --primary-foreground: #ffffff;
-  --secondary: #f4f4f5;
-  --secondary-foreground: #18181b;
-  --muted: #f4f4f5;
-  --muted-foreground: #71717a;
-  --accent: #f4f4f5;
-  --accent-foreground: #18181b;
-  --destructive: #ef4444;
-  --destructive-foreground: #fafafa;
-  --border: #e4e4e7;
-  --input: #e4e4e7;
-  --ring: #6366f1;
+  --background: #FAFAFA;
+  --foreground: #111827;
+  --card: #FFFFFF;
+  --card-foreground: #111827;
+  --popover: #FFFFFF;
+  --popover-foreground: #111827;
+  --primary: #D4AF37;
+  --primary-foreground: #FFFFFF;
+  --secondary: #F3F4F6;
+  --secondary-foreground: #111827;
+  --muted: #F9FAFB;
+  --muted-foreground: #6B7280;
+  --accent: #F3F4F6;
+  --accent-foreground: #111827;
+  --destructive: #EF4444;
+  --destructive-foreground: #FFFFFF;
+  --border: #E5E7EB;
+  --input: #E5E7EB;
+  --ring: #D4AF37;
   --radius: 0.75rem;
   
-  --glass-bg: rgba(255, 255, 255, 0.45);
-  --glass-border: rgba(228, 228, 231, 0.6);
+  --glass-bg: rgba(255, 255, 255, 0.75);
+  --glass-border: rgba(229, 231, 235, 0.85);
   --glass-blur: 16px;
 }
 
 .dark {
-  --background: #09090b;
-  --foreground: #fafafa;
-  --card: #121215;
-  --card-foreground: #fafafa;
-  --popover: #09090b;
-  --popover-foreground: #fafafa;
-  --primary: #818cf8;
-  --primary-foreground: #09090b;
-  --secondary: #27272a;
-  --secondary-foreground: #fafafa;
-  --muted: #27272a;
-  --muted-foreground: #a1a1aa;
-  --accent: #27272a;
-  --accent-foreground: #fafafa;
-  --destructive: #7f1d1d;
-  --destructive-foreground: #fafafa;
-  --border: #27272a;
-  --input: #27272a;
-  --ring: #818cf8;
+  --background: #0A0A0A;
+  --foreground: #FFFFFF;
+  --card: #111111;
+  --card-foreground: #FFFFFF;
+  --popover: #0A0A0A;
+  --popover-foreground: #FFFFFF;
+  --primary: #D4AF37;
+  --primary-foreground: #0A0A0A;
+  --secondary: #1F1F1F;
+  --secondary-foreground: #FFFFFF;
+  --muted: #1F1F1F;
+  --muted-foreground: #A1A1AA;
+  --accent: #1F1F1F;
+  --accent-foreground: #FFFFFF;
+  --destructive: #7F1D1D;
+  --destructive-foreground: #FFFFFF;
+  --border: #222222;
+  --input: #222222;
+  --ring: #D4AF37;
   
-  --glass-bg: rgba(18, 18, 21, 0.65);
-  --glass-border: rgba(39, 39, 42, 0.5);
+  --glass-bg: rgba(17, 17, 17, 0.85);
+  --glass-border: rgba(34, 34, 34, 0.75);
   --glass-blur: 16px;
 }
 
@@ -58,13 +58,20 @@
   --color-foreground: var(--foreground);
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
   --color-border: var(--border);
+  --color-input: var(--input);
   --color-ring: var(--ring);
   --radius-xl: var(--radius);
 }
@@ -145,4 +152,129 @@ body {
 
 .animate-pulse-slow {
   animation: pulse-slow 3s ease-in-out infinite;
+}
+
+/* Automatic Light Mode Overrides for Hardcoded Dark Utility Classes */
+html:not(.dark) body {
+  background-color: #FAFAFA !important;
+  color: #111827 !important;
+}
+
+html:not(.dark) .bg-zinc-950,
+html:not(.dark) .bg-\[\#09090b\],
+html:not(.dark) .bg-zinc-950\/30,
+html:not(.dark) .bg-zinc-950\/40,
+html:not(.dark) .bg-zinc-950\/50,
+html:not(.dark) .bg-zinc-950\/60,
+html:not(.dark) .bg-zinc-950\/80,
+html:not(.dark) .bg-black {
+  background-color: #FAFAFA !important;
+}
+
+html:not(.dark) .bg-zinc-900,
+html:not(.dark) .bg-zinc-900\/10,
+html:not(.dark) .bg-zinc-900\/20,
+html:not(.dark) .bg-zinc-900\/30,
+html:not(.dark) .bg-zinc-900\/40,
+html:not(.dark) .bg-zinc-900\/50,
+html:not(.dark) .bg-zinc-900\/60,
+html:not(.dark) .bg-zinc-900\/80,
+html:not(.dark) .bg-zinc-950\/20,
+html:not(.dark) .bg-zinc-950\/40,
+html:not(.dark) .bg-zinc-950\/50,
+html:not(.dark) .bg-zinc-950\/80 {
+  background-color: #FFFFFF !important;
+}
+
+/* Glassmorphism overrides for Light Mode */
+html:not(.dark) .glass {
+  background: rgba(255, 255, 255, 0.75) !important;
+  border-color: rgba(229, 231, 235, 0.85) !important;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.03) !important;
+}
+
+/* Border overrides for Light Mode */
+html:not(.dark) .border-zinc-900,
+html:not(.dark) .border-zinc-900\/50,
+html:not(.dark) .border-zinc-900\/60,
+html:not(.dark) .border-zinc-800,
+html:not(.dark) .border-zinc-800\/50,
+html:not(.dark) .border-zinc-800\/80,
+html:not(.dark) .border-zinc-850,
+html:not(.dark) .border-zinc-850\/50 {
+  border-color: #E5E7EB !important;
+}
+
+/* Text overrides for Light Mode */
+html:not(.dark) .text-zinc-100,
+html:not(.dark) .text-zinc-200,
+html:not(.dark) .text-white {
+  color: #111827 !important;
+}
+
+html:not(.dark) .text-zinc-400,
+html:not(.dark) .text-zinc-505,
+html:not(.dark) .text-zinc-500,
+html:not(.dark) .text-zinc-650,
+html:not(.dark) .text-zinc-600 {
+  color: #6B7280 !important;
+}
+
+html:not(.dark) .text-zinc-300,
+html:not(.dark) .text-zinc-350 {
+  color: #374151 !important;
+}
+
+/* Specific elements that must retain white text color (e.g. indigo buttons) */
+html:not(.dark) .bg-indigo-600,
+html:not(.dark) .bg-indigo-500,
+html:not(.dark) .bg-gradient-to-tr,
+html:not(.dark) .bg-indigo-600 *,
+html:not(.dark) .bg-indigo-550 *,
+html:not(.dark) .bg-indigo-500 * {
+  color: #FFFFFF !important;
+}
+
+html:not(.dark) button.bg-indigo-600,
+html:not(.dark) button.bg-indigo-600 span,
+html:not(.dark) a.bg-indigo-600,
+html:not(.dark) a.bg-indigo-600 span {
+  color: #FFFFFF !important;
+}
+
+/* Input, Textarea, and Select form overrides in Light Mode */
+html:not(.dark) input,
+html:not(.dark) textarea,
+html:not(.dark) select {
+  background-color: #FFFFFF !important;
+  color: #111827 !important;
+  border-color: #E5E7EB !important;
+}
+
+html:not(.dark) input::placeholder,
+html:not(.dark) textarea::placeholder {
+  color: #9CA3AF !important;
+}
+
+/* Hover overrides in Light Mode */
+html:not(.dark) .hover\:bg-zinc-900:hover,
+html:not(.dark) .hover\:bg-zinc-900\/50:hover,
+html:not(.dark) .hover\:bg-zinc-800:hover,
+html:not(.dark) .hover\:bg-zinc-800\/80:hover {
+  background-color: #F3F4F6 !important;
+}
+
+html:not(.dark) .hover\:text-white:hover,
+html:not(.dark) .hover\:text-zinc-200:hover,
+html:not(.dark) .hover\:text-zinc-300:hover {
+  color: #111827 !important;
+}
+
+/* Glow meshes matching light theme */
+html:not(.dark) .glow-mesh {
+  background: radial-gradient(circle, rgba(212, 175, 55, 0.12) 0%, rgba(212, 175, 55, 0.03) 50%, transparent 100%) !important;
+}
+
+html:not(.dark) .glow-mesh-2 {
+  background: radial-gradient(circle, rgba(212, 175, 55, 0.08) 0%, rgba(212, 175, 55, 0.02) 50%, transparent 100%) !important;
 }

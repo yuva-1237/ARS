@@ -7,13 +7,16 @@ interface User {
   role: string;
 }
 
-interface Notification {
-  id: number;
+export interface Notification {
+  id: string;
+  userId: string;
   title: string;
   message: string;
-  is_read: boolean;
-  notification_type: string;
-  created_at: string;
+  type: string;
+  read: boolean;
+  createdAt: any;
+  actionUrl: string | null;
+  metadata?: any;
 }
 
 interface ARSState {
@@ -31,7 +34,7 @@ interface ARSState {
   setTheme: (theme: "light" | "dark") => void;
   setNotifications: (notifs: Notification[]) => void;
   addNotification: (notif: Notification) => void;
-  markNotificationRead: (id: number) => void;
+  markNotificationRead: (id: string) => void;
 }
 
 export const useStore = create<ARSState>((set) => {
@@ -115,7 +118,7 @@ export const useStore = create<ARSState>((set) => {
 
     markNotificationRead: (id) => set((state) => ({
       notifications: state.notifications.map((n) =>
-        n.id === id ? { ...n, is_read: true } : n
+        n.id === id ? { ...n, read: true } : n
       )
     }))
   };

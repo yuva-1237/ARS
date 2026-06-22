@@ -15,56 +15,116 @@ hr_only = RoleChecker(["hr_manager", "admin"])
 
 @router.get("/")
 def get_analytics(
+    job_id: Optional[int] = None,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
     """
-    Returns aggregated telemetry data for charts and dashboard cards.
+    Returns aggregated telemetry data for charts and dashboard cards. Supports optional job_id filtering.
     """
-    # 1. Total Candidates count
-    total_candidates = db.query(Candidate).count()
-    
-    # 2. Active Jobs count
+    # 1. Active Jobs count (always global)
     active_jobs = db.query(JobDescription).filter(JobDescription.status == "active").count()
     
-    # 3. Average Match Score
-    avg_score = db.query(func.avg(CandidateScore.overall_score)).scalar() or 0.0
-    avg_score = round(float(avg_score), 1)
-    
-    # 4. Resume Processing Rate (parsed vs total)
-    total_resumes = db.query(Resume).count()
-    parsed_resumes = db.query(Resume).filter(Resume.status == "parsed").count()
-    processing_rate = (parsed_resumes / total_resumes * 100) if total_resumes else 0.0
-    processing_rate = round(processing_rate, 1)
-
-    # 5. Funnel Distribution
-    status_counts = db.query(Candidate.status, func.count(Candidate.id)).group_by(Candidate.status).all()
-    funnel = {s: count for s, count in status_counts}
-    # Enforce standard keys
-    funnel_data = [
-        {"stage": "Applied/New", "value": funnel.get("new", 0)},
-        {"stage": "AI Screened", "value": funnel.get("screening", 0) + parsed_resumes},
-        {"stage": "Interviewing", "value": funnel.get("interviewed", 0)},
-        {"stage": "Offered", "value": funnel.get("offered", 0)},
-        {"stage": "Rejected", "value": funnel.get("rejected", 0)},
-    ]
-
-    # 6. Applications by Job
-    jobs = db.query(JobDescription).all()
-    job_applications = []
-    for job in jobs:
-        count = db.query(CandidateScore).filter(CandidateScore.job_id == job.id).count()
-        job_applications.append({
-            "name": job.title,
-            "count": count
-        })
+    if job_id:
+        # Filter candidates associated with this job
+        query_cand = db.query(Candidate).join(CandidateScore, Candidate.id == CandidateScore.candidate_id).filter(CandidateScore.job_id == job_id)
+        total_candidates = query_cand.count()
         
-    # 7. Skill Distribution
-    candidates = db.query(Candidate).all()
+        # Average Match Score for this job
+        avg_score = db.query(func.avg(CandidateScore.overall_score)).filter(CandidateScore.job_id == job_id).scalar() or 0.0
+        avg_score = round(float(avg_score), 1)
+        
+        # Resume Processing Rate for resumes scored against this job
+        total_resumes = db.query(Resume).join(Candidate, Resume.id == Candidate.resume_id).join(
+            CandidateScore, Candidate.id == CandidateScore.candidate_id
+        ).filter(CandidateScore.job_id == job_id).count()
+        
+        parsed_resumes = db.query(Resume).join(Candidate, Resume.id == Candidate.resume_id).join(
+            CandidateScore, Candidate.id == CandidateScore.candidate_id
+        ).filter(CandidateScore.job_id == job_id).filter(Resume.status == "parsed").count()
+        
+        processing_rate = (parsed_resumes / total_resumes * 100) if total_resumes else 0.0
+        processing_rate = round(processing_rate, 1)
+
+        # Stage distributions for this job
+        status_counts = db.query(Candidate.status, func.count(Candidate.id)).join(
+            CandidateScore, Candidate.id == CandidateScore.candidate_id
+        ).filter(CandidateScore.job_id == job_id).group_by(Candidate.status).all()
+        funnel = {s: count for s, count in status_counts}
+        
+        funnel_data = [
+            {"stage": "Applied/New", "value": funnel.get("new", 0)},
+            {"stage": "AI Screened", "value": funnel.get("screening", 0) + parsed_resumes},
+            {"stage": "Interviewing", "value": funnel.get("interviewed", 0)},
+            {"stage": "Offered", "value": funnel.get("offered", 0)},
+            {"stage": "Rejected", "value": funnel.get("rejected", 0)},
+        ]
+
+        # Single job display for applications chart
+        job = db.query(JobDescription).filter(JobDescription.id == job_id).first()
+        job_applications = [{
+            "name": job.title if job else f"Job #{job_id}",
+            "count": total_candidates
+        }]
+
+        # Skill distributions for this job
+        candidates = db.query(Candidate).join(CandidateScore, Candidate.id == CandidateScore.candidate_id).filter(CandidateScore.job_id == job_id).all()
+        
+        # Interview readiness score (average score of candidates in screening or interviewed for this job)
+        readiness_query = db.query(func.avg(CandidateScore.overall_score)).join(
+            Candidate, Candidate.id == CandidateScore.candidate_id
+        ).filter(
+            CandidateScore.job_id == job_id,
+            Candidate.status.in_(["screening", "interviewed"])
+        ).scalar()
+        interview_readiness_score = round(float(readiness_query), 1) if readiness_query else 0.0
+
+    else:
+        # Global stats
+        total_candidates = db.query(Candidate).count()
+        avg_score = db.query(func.avg(CandidateScore.overall_score)).scalar() or 0.0
+        avg_score = round(float(avg_score), 1)
+        
+        total_resumes = db.query(Resume).count()
+        parsed_resumes = db.query(Resume).filter(Resume.status == "parsed").count()
+        processing_rate = (parsed_resumes / total_resumes * 100) if total_resumes else 0.0
+        processing_rate = round(processing_rate, 1)
+
+        status_counts = db.query(Candidate.status, func.count(Candidate.id)).group_by(Candidate.status).all()
+        funnel = {s: count for s, count in status_counts}
+        
+        funnel_data = [
+            {"stage": "Applied/New", "value": funnel.get("new", 0)},
+            {"stage": "AI Screened", "value": funnel.get("screening", 0) + parsed_resumes},
+            {"stage": "Interviewing", "value": funnel.get("interviewed", 0)},
+            {"stage": "Offered", "value": funnel.get("offered", 0)},
+            {"stage": "Rejected", "value": funnel.get("rejected", 0)},
+        ]
+
+        # Applications count per job
+        jobs = db.query(JobDescription).all()
+        job_applications = []
+        for j in jobs:
+            count = db.query(CandidateScore).filter(CandidateScore.job_id == j.id).count()
+            job_applications.append({
+                "name": j.title,
+                "count": count
+            })
+            
+        candidates = db.query(Candidate).all()
+        
+        # Global interview readiness score
+        readiness_query = db.query(func.avg(CandidateScore.overall_score)).join(
+            Candidate, Candidate.id == CandidateScore.candidate_id
+        ).filter(
+            Candidate.status.in_(["screening", "interviewed"])
+        ).scalar()
+        interview_readiness_score = round(float(readiness_query), 1) if readiness_query else 0.0
+
+    # Skill counter logic
     all_skills = []
     for c in candidates:
         if c.skills:
-            # skills is a list of strings
             all_skills.extend([s.strip().capitalize() for s in c.skills])
             
     skill_counts = Counter(all_skills).most_common(8)
@@ -76,7 +136,7 @@ def get_analytics(
             {"name": "SQL", "count": 0}
         ]
 
-    # 8. Experience Years Breakdown
+    # Experience breakdown
     experience_breakdown = [
         {"name": "Entry (0-2 yrs)", "value": 0},
         {"name": "Mid (3-5 yrs)", "value": 0},
@@ -101,7 +161,7 @@ def get_analytics(
             "active_jobs": active_jobs,
             "avg_match_score": avg_score,
             "processing_rate": processing_rate,
-            "interview_readiness_score": 78.5, # Custom metric
+            "interview_readiness_score": interview_readiness_score,
             "resume_total": total_resumes
         },
         "charts": {

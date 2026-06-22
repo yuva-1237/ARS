@@ -10,6 +10,7 @@ from backend.app.models import Resume, User
 from backend.app.schemas import ResumeOut
 from backend.app.api.deps import get_current_user, RoleChecker
 from backend.app.tasks.resume_tasks import process_resume_workflow, process_resume_task
+from backend.app.services.firebase_service import send_notification_to_user
 
 router = APIRouter()
 upload_staff_only = RoleChecker(["recruiter", "hr_manager", "admin"])
@@ -92,6 +93,13 @@ async def upload_resumes(
         db.add(new_resume)
         db.commit()
         db.refresh(new_resume)
+        send_notification_to_user(
+            current_user.id,
+            "File Uploaded",
+            f"Resume '{upload_file.filename}' has been successfully uploaded and scheduled for parsing.",
+            "info",
+            db=db
+        )
         
         # Launch parsing task
         # We check if celery is run in eager mode or if we run it synchronously via FastAPI BackgroundTasks

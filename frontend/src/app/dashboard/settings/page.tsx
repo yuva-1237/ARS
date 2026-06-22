@@ -136,6 +136,14 @@ export default function SettingsPage() {
       await api.put(`/settings/?org_name=${encodeURIComponent(orgName)}`, weights);
       
       triggerToast("Account settings updated successfully!");
+      const { createLocalNotification } = await import("@/utils/notifications");
+      createLocalNotification(
+        res.data,
+        token,
+        "Profile Updated",
+        "Your profile details have been successfully updated.",
+        "success"
+      );
     } catch (err: any) {
       console.error(err);
       triggerToast(err.response?.data?.detail || "Failed to update account credentials.", true);
@@ -189,11 +197,19 @@ export default function SettingsPage() {
     setSaving(true);
     // Call user profile update to update password
     api.put("/auth/me", { password: newPassword })
-      .then(() => {
+      .then(async () => {
         triggerToast("Password updated successfully!");
         setOldPassword("");
         setNewPassword("");
         setConfirmPassword("");
+        const { createLocalNotification } = await import("@/utils/notifications");
+        createLocalNotification(
+          user,
+          token,
+          "Password Changed",
+          "Your account password was updated successfully.",
+          "warning"
+        );
       })
       .catch((err) => {
         console.error(err);
@@ -202,21 +218,46 @@ export default function SettingsPage() {
       .finally(() => setSaving(false));
   };
 
-  const handleSaveMemory = (e: React.FormEvent) => {
+  const handleSaveMemory = async (e: React.FormEvent) => {
     e.preventDefault();
     if (typeof window !== "undefined") {
       localStorage.setItem("settings_rag_limit", ragLimit.toString());
       localStorage.setItem("settings_instruction", systemInstruction);
     }
     triggerToast("Copilot memory system configurations updated.");
+    const { createLocalNotification } = await import("@/utils/notifications");
+    createLocalNotification(
+      user,
+      token,
+      "Memory System Configured",
+      `Copilot memory configuration updated: retrieval context set to ${ragLimit} documents.`,
+      "success"
+    );
   };
 
-  const handleSaveNotifications = (e: React.FormEvent) => {
+  const handleSaveNotifications = async (e: React.FormEvent) => {
     e.preventDefault();
     if (typeof window !== "undefined") {
       localStorage.setItem("settings_digests", emailDigests.toString());
       localStorage.setItem("settings_push", pushAlerts.toString());
       localStorage.setItem("settings_errors", errorAlerts.toString());
+    }
+    
+    if (pushAlerts) {
+      const { requestPushPermission } = await import("@/utils/notifications");
+      const granted = await requestPushPermission(user, token);
+      if (granted) {
+        triggerToast("Push notifications enabled & preferences saved!");
+        const { createLocalNotification } = await import("@/utils/notifications");
+        createLocalNotification(
+          user,
+          token,
+          "Security Alert: Push Subscribed",
+          "This device is now registered to receive real-time push notifications.",
+          "info"
+        );
+        return;
+      }
     }
     triggerToast("Alert preferences saved!");
   };
@@ -233,10 +274,10 @@ export default function SettingsPage() {
   if (loading) {
     return (
       <div className="space-y-6 animate-pulse">
-        <div className="h-8 w-48 bg-zinc-800 rounded" />
+        <div className="h-8 w-48 bg-secondary rounded" />
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <div className="h-48 bg-zinc-900 border border-zinc-800 rounded-2xl md:col-span-1" />
-          <div className="h-96 bg-zinc-900 border border-zinc-800 rounded-2xl md:col-span-3" />
+          <div className="h-48 bg-card border border-border rounded-2xl md:col-span-1" />
+          <div className="h-96 bg-card border border-border rounded-2xl md:col-span-3" />
         </div>
       </div>
     );
@@ -259,8 +300,8 @@ export default function SettingsPage() {
       
       {/* Title */}
       <div>
-        <h1 className="text-3xl font-extrabold text-white tracking-tight">Platform Settings</h1>
-        <p className="text-zinc-400 text-sm mt-1">Configure profile configurations, LLM settings, weights, and alert options.</p>
+        <h1 className="text-3xl font-extrabold text-foreground tracking-tight">Platform Settings</h1>
+        <p className="text-muted-foreground text-sm mt-1">Configure profile configurations, LLM settings, weights, and alert options.</p>
       </div>
 
       {/* Messages */}
@@ -308,7 +349,7 @@ export default function SettingsPage() {
                 className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-xs font-bold transition-all text-left ${
                   isSelected 
                     ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/10" 
-                    : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/50"
+                    : "text-muted-foreground hover:text-foreground hover:bg-secondary/50"
                 }`}
               >
                 <Icon className="w-4 h-4" />
@@ -320,55 +361,55 @@ export default function SettingsPage() {
 
         {/* Right Side Forms */}
         <div className="md:col-span-3">
-          <div className="glass border border-zinc-900 rounded-2xl p-8 space-y-6">
+          <div className="glass border border-border rounded-2xl p-8 space-y-6">
             
             {/* Account Panel */}
             {activeTab === "account" && (
               <form onSubmit={handleSaveAccount} className="space-y-6">
                 <div>
-                  <h3 className="text-base font-bold text-white mb-1">Account Profile</h3>
-                  <p className="text-zinc-400 text-xs">Manage your personal data credentials and corporate organization values.</p>
+                  <h3 className="text-base font-bold text-foreground mb-1">Account Profile</h3>
+                  <p className="text-muted-foreground text-xs">Manage your personal data credentials and corporate organization values.</p>
                 </div>
-                <hr className="border-zinc-900" />
+                <hr className="border-border" />
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-[10px] font-bold text-zinc-500 uppercase tracking-wider mb-2">Full Name</label>
+                    <label className="block text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-2">Full Name</label>
                     <input
                       type="text"
                       required
                       value={fullName}
                       onChange={(e) => setFullName(e.target.value)}
-                      className="w-full bg-zinc-950/50 border border-zinc-800 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 rounded-lg py-2.5 px-4 text-xs text-white outline-none transition-all"
+                      className="w-full bg-background/50 border border-border focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 rounded-lg py-2.5 px-4 text-xs text-foreground outline-none transition-all"
                     />
                   </div>
                   <div>
-                    <label className="block text-[10px] font-bold text-zinc-500 uppercase tracking-wider mb-2">Email Address</label>
+                    <label className="block text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-2">Email Address</label>
                     <input
                       type="email"
                       required
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="w-full bg-zinc-950/50 border border-zinc-800 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 rounded-lg py-2.5 px-4 text-xs text-white outline-none transition-all"
+                      className="w-full bg-background/50 border border-border focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 rounded-lg py-2.5 px-4 text-xs text-foreground outline-none transition-all"
                     />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
                   <div>
-                    <label className="block text-[10px] font-bold text-zinc-500 uppercase tracking-wider mb-2">System Role</label>
-                    <div className="w-full bg-zinc-900/40 border border-zinc-850 rounded-lg py-2.5 px-4 text-xs text-zinc-450 capitalize font-semibold cursor-not-allowed">
+                    <label className="block text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-2">System Role</label>
+                    <div className="w-full bg-secondary/40 border border-border rounded-lg py-2.5 px-4 text-xs text-muted-foreground capitalize font-semibold cursor-not-allowed">
                       {user?.role.replace("_", " ") || "Recruiter"} (System Gated)
                     </div>
                   </div>
                   <div>
-                    <label className="block text-[10px] font-bold text-zinc-500 uppercase tracking-wider mb-2">Organization Name</label>
+                    <label className="block text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-2">Organization Name</label>
                     <input
                       type="text"
                       required
                       value={orgName}
                       onChange={(e) => setOrgName(e.target.value)}
-                      className="w-full bg-zinc-950/50 border border-zinc-800 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 rounded-lg py-2.5 px-4 text-xs text-white outline-none transition-all"
+                      className="w-full bg-background/50 border border-border focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 rounded-lg py-2.5 px-4 text-xs text-foreground outline-none transition-all"
                     />
                   </div>
                 </div>
@@ -377,7 +418,7 @@ export default function SettingsPage() {
                   <button
                     type="submit"
                     disabled={saving}
-                    className="inline-flex items-center space-x-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 disabled:bg-zinc-800 disabled:text-zinc-650 text-white text-xs font-bold rounded-lg transition-all"
+                    className="inline-flex items-center space-x-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 disabled:bg-secondary disabled:text-muted-foreground text-white text-xs font-bold rounded-lg transition-all cursor-pointer"
                   >
                     {saving && <RefreshCw className="w-3.5 h-3.5 animate-spin" />}
                     <span>Save Account Details</span>
@@ -390,29 +431,29 @@ export default function SettingsPage() {
             {activeTab === "appearance" && (
               <form onSubmit={handleSaveAppearance} className="space-y-6">
                 <div>
-                  <h3 className="text-base font-bold text-white mb-1">Branding & Theme Settings</h3>
-                  <p className="text-zinc-400 text-xs">Calibrate dark/light themes, screen sizing parameters, and visual alignments.</p>
+                  <h3 className="text-base font-bold text-foreground mb-1">Branding & Theme Settings</h3>
+                  <p className="text-muted-foreground text-xs">Calibrate dark/light themes, screen sizing parameters, and visual alignments.</p>
                 </div>
-                <hr className="border-zinc-900" />
+                <hr className="border-border" />
                 
                 <div className="space-y-4">
-                  <label className="block text-[10px] font-bold text-zinc-500 uppercase tracking-wider">Interface Theme Mode</label>
+                  <label className="block text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Interface Theme Mode</label>
                   <div className="flex items-center space-x-4">
                     <button
                       type="button"
                       onClick={toggleTheme}
-                      className="inline-flex items-center space-x-2.5 px-5 py-3 border border-zinc-800 bg-zinc-950/50 text-zinc-200 hover:text-white rounded-xl text-xs font-semibold transition-all"
+                      className="inline-flex items-center space-x-2.5 px-5 py-3 border border-border bg-background/50 text-foreground hover:text-foreground hover:bg-secondary rounded-xl text-xs font-semibold transition-all cursor-pointer"
                     >
                       <span>Toggle current theme mode</span>
                     </button>
-                    <span className="text-xs font-bold text-indigo-400 uppercase tracking-wider">
+                    <span className="text-xs font-bold text-indigo-500 uppercase tracking-wider">
                       Active: {theme}
                     </span>
                   </div>
                 </div>
 
                 <div className="space-y-4 pt-2">
-                  <label className="block text-[10px] font-bold text-zinc-500 uppercase tracking-wider">Interface Sizing Density</label>
+                  <label className="block text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Interface Sizing Density</label>
                   <div className="grid grid-cols-3 gap-3">
                     {[
                       { id: "compact", label: "Compact density" },
@@ -423,10 +464,10 @@ export default function SettingsPage() {
                         key={d.id}
                         type="button"
                         onClick={() => setDensity(d.id as any)}
-                        className={`py-3 px-4 border rounded-xl text-xs font-semibold transition-all text-center ${
+                        className={`py-3 px-4 border rounded-xl text-xs font-semibold transition-all text-center cursor-pointer ${
                           density === d.id 
-                            ? "bg-indigo-600/10 border-indigo-500 text-indigo-300 shadow" 
-                            : "bg-zinc-950/20 border-zinc-850 text-zinc-500 hover:text-zinc-300"
+                            ? "bg-indigo-600/10 border-indigo-500 text-indigo-500 shadow" 
+                            : "bg-background/20 border-border text-muted-foreground hover:text-foreground"
                         }`}
                       >
                         {d.label}
@@ -438,7 +479,7 @@ export default function SettingsPage() {
                 <div className="flex justify-end pt-4">
                   <button
                     type="submit"
-                    className="inline-flex items-center px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-lg transition-all"
+                    className="inline-flex items-center px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-lg transition-all cursor-pointer"
                   >
                     <span>Save Layout State</span>
                   </button>
@@ -451,18 +492,18 @@ export default function SettingsPage() {
               <form onSubmit={handleSaveAIWeights} className="space-y-6">
                 <div className="flex justify-between items-center">
                   <div>
-                    <h3 className="text-base font-bold text-white mb-1">AI Scoring Calibration</h3>
-                    <p className="text-zinc-400 text-xs">Calibrate what portions of candidate CV profiles carry more weight during matches.</p>
+                    <h3 className="text-base font-bold text-foreground mb-1">AI Scoring Calibration</h3>
+                    <p className="text-muted-foreground text-xs">Calibrate what portions of candidate CV profiles carry more weight during matches.</p>
                   </div>
                   <span className={`text-xs font-bold px-3 py-1 border rounded-full ${
                     totalPercentage === 100 
-                      ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400" 
-                      : "bg-rose-500/10 border-rose-500/20 text-rose-455"
+                      ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-500" 
+                      : "bg-rose-500/10 border-rose-500/20 text-rose-500"
                   }`}>
                     Total: {totalPercentage}%
                   </span>
                 </div>
-                <hr className="border-zinc-900" />
+                <hr className="border-border" />
                 
                 <div className="space-y-4">
                   {[
@@ -475,7 +516,7 @@ export default function SettingsPage() {
                     { label: "Resume Semantic Core Alignment", key: "semantic_weight" as const }
                   ].map((s) => (
                     <div key={s.key} className="grid grid-cols-1 md:grid-cols-4 gap-4 items-center text-xs">
-                      <span className="font-semibold text-zinc-350 col-span-2">{s.label}</span>
+                      <span className="font-semibold text-muted-foreground col-span-2">{s.label}</span>
                       <input
                         type="range"
                         min="0"
@@ -485,30 +526,30 @@ export default function SettingsPage() {
                         onChange={(e) => handleWeightChange(s.key, parseFloat(e.target.value))}
                         className="w-full accent-indigo-500"
                       />
-                      <span className="font-bold text-white text-right">
+                      <span className="font-bold text-foreground text-right">
                         {Math.round(weights[s.key] * 100)}%
                       </span>
                     </div>
                   ))}
                 </div>
 
-                <hr className="border-zinc-900" />
+                <hr className="border-border" />
                 
                 <div>
-                  <h4 className="text-xs font-bold text-white uppercase tracking-wider mb-3">API Environment Configurations</h4>
+                  <h4 className="text-xs font-bold text-foreground uppercase tracking-wider mb-3">API Environment Configurations</h4>
                   <div className="flex items-center space-x-3 text-xs leading-normal">
                     <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 border ${
                       geminiConfigured 
-                        ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400" 
-                        : "bg-rose-500/10 border-rose-500/20 text-rose-455"
+                        ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-500" 
+                        : "bg-rose-500/10 border-rose-500/20 text-rose-500"
                     }`}>
                       <ShieldCheck className="w-4.5 h-4.5" />
                     </div>
                     <div>
-                      <span className="font-bold text-white block">
+                      <span className="font-bold text-foreground block">
                         Google Gemini Integration Status: {geminiConfigured ? "Connected" : "Not Configured"}
                       </span>
-                      <span className="text-[10px] text-zinc-500 block mt-0.5">
+                      <span className="text-[10px] text-muted-foreground block mt-0.5">
                         {geminiConfigured 
                           ? "API active. Resume analysis pipeline fully operating on Gemini Models." 
                           : "Set GEMINI_API_KEY environment variable to active cloud intelligence parser."
@@ -522,7 +563,7 @@ export default function SettingsPage() {
                   <button
                     type="submit"
                     disabled={saving}
-                    className="inline-flex items-center space-x-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 disabled:bg-zinc-800 disabled:text-zinc-650 text-white text-xs font-bold rounded-lg transition-all"
+                    className="inline-flex items-center space-x-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 disabled:bg-secondary disabled:text-muted-foreground text-white text-xs font-bold rounded-lg transition-all cursor-pointer"
                   >
                     {saving && <RefreshCw className="w-3.5 h-3.5 animate-spin" />}
                     <span>Save Parameters</span>
@@ -535,18 +576,18 @@ export default function SettingsPage() {
             {activeTab === "privacy" && (
               <form onSubmit={handleSavePrivacy} className="space-y-6">
                 <div>
-                  <h3 className="text-base font-bold text-white mb-1">Privacy & Compliance</h3>
-                  <p className="text-zinc-400 text-xs">Manage data storage policies, diagnostic sharing, and delete system storage details.</p>
+                  <h3 className="text-base font-bold text-foreground mb-1">Privacy & Compliance</h3>
+                  <p className="text-muted-foreground text-xs">Manage data storage policies, diagnostic sharing, and delete system storage details.</p>
                 </div>
-                <hr className="border-zinc-900" />
+                <hr className="border-border" />
 
                 <div className="space-y-6">
                   <div>
-                    <label className="block text-[10px] font-bold text-zinc-500 uppercase tracking-wider mb-2">Audit Logs Retention Period</label>
+                    <label className="block text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-2">Audit Logs Retention Period</label>
                     <select
                       value={logRetention}
                       onChange={(e) => setLogRetention(e.target.value)}
-                      className="max-w-md w-full bg-zinc-950/50 border border-zinc-800 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 rounded-lg py-2.5 px-4 text-xs text-white outline-none outline-none"
+                      className="max-w-md w-full bg-background/50 border border-border focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 rounded-lg py-2.5 px-4 text-xs text-foreground outline-none cursor-pointer"
                     >
                       <option value="30">30 Days</option>
                       <option value="90">90 Days</option>
@@ -561,25 +602,25 @@ export default function SettingsPage() {
                       id="diagnostics"
                       checked={shareDiagnostics}
                       onChange={(e) => setShareDiagnostics(e.target.checked)}
-                      className="w-4 h-4 accent-indigo-500 mt-0.5 rounded border-zinc-800 focus:ring-0 focus:ring-offset-0 bg-zinc-950"
+                      className="w-4 h-4 accent-indigo-500 mt-0.5 rounded border-border focus:ring-0 focus:ring-offset-0 bg-background cursor-pointer"
                     />
                     <div>
-                      <label htmlFor="diagnostics" className="text-xs font-bold text-white block">Share anonymized diagnostic data</label>
-                      <span className="text-[10px] text-zinc-500 block mt-0.5">Help us trace errors and optimize processing latency logs. No candidates profiles are transmitted.</span>
+                      <label htmlFor="diagnostics" className="text-xs font-bold text-foreground block cursor-pointer">Share anonymized diagnostic data</label>
+                      <span className="text-[10px] text-muted-foreground block mt-0.5">Help us trace errors and optimize processing latency logs. No candidates profiles are transmitted.</span>
                     </div>
                   </div>
 
-                  <hr className="border-zinc-900" />
+                  <hr className="border-border" />
 
                   <div className="p-4 bg-rose-500/5 border border-rose-500/10 rounded-xl space-y-3.5">
-                    <h4 className="text-xs font-bold text-rose-300">Danger Zone</h4>
-                    <p className="text-[10.5px] text-zinc-450 leading-normal">
+                    <h4 className="text-xs font-bold text-rose-500">Danger Zone</h4>
+                    <p className="text-[10.5px] text-muted-foreground leading-normal">
                       Clearing the local cache will reset interface configs, preferences, and prompt settings. User DB information will remain intact.
                     </p>
                     <button
                       type="button"
                       onClick={clearAllCaches}
-                      className="inline-flex items-center px-4 py-2 border border-rose-500/20 hover:bg-rose-500/10 text-rose-300 text-xs font-bold rounded-lg transition-all"
+                      className="inline-flex items-center px-4 py-2 border border-rose-500/20 hover:bg-rose-500/10 text-rose-500 text-xs font-bold rounded-lg transition-all cursor-pointer"
                     >
                       <span>Clear browser settings cache</span>
                     </button>
@@ -589,7 +630,7 @@ export default function SettingsPage() {
                 <div className="flex justify-end pt-4">
                   <button
                     type="submit"
-                    className="inline-flex items-center px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-lg transition-all"
+                    className="inline-flex items-center px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-lg transition-all cursor-pointer"
                   >
                     <span>Save Compliance Rules</span>
                   </button>
@@ -601,40 +642,40 @@ export default function SettingsPage() {
             {activeTab === "security" && (
               <form onSubmit={handleSaveSecurity} className="space-y-6">
                 <div>
-                  <h3 className="text-base font-bold text-white mb-1">Security & Session Control</h3>
-                  <p className="text-zinc-400 text-xs">Change password configurations, check login credentials, and review tokens.</p>
+                  <h3 className="text-base font-bold text-foreground mb-1">Security & Session Control</h3>
+                  <p className="text-muted-foreground text-xs">Change password configurations, check login credentials, and review tokens.</p>
                 </div>
-                <hr className="border-zinc-900" />
+                <hr className="border-border" />
 
                 <div className="space-y-4 max-w-md">
                   <div>
-                    <label className="block text-[10px] font-bold text-zinc-500 uppercase tracking-wider mb-2">Current Password</label>
+                    <label className="block text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-2">Current Password</label>
                     <input
                       type="password"
                       required
                       value={oldPassword}
                       onChange={(e) => setOldPassword(e.target.value)}
-                      className="w-full bg-zinc-950/50 border border-zinc-800 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 rounded-lg py-2.5 px-4 text-xs text-white outline-none transition-all"
+                      className="w-full bg-background/50 border border-border focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 rounded-lg py-2.5 px-4 text-xs text-foreground outline-none transition-all"
                     />
                   </div>
                   <div>
-                    <label className="block text-[10px] font-bold text-zinc-500 uppercase tracking-wider mb-2">New Password</label>
+                    <label className="block text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-2">New Password</label>
                     <input
                       type="password"
                       required
                       value={newPassword}
                       onChange={(e) => setNewPassword(e.target.value)}
-                      className="w-full bg-zinc-950/50 border border-zinc-800 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 rounded-lg py-2.5 px-4 text-xs text-white outline-none transition-all"
+                      className="w-full bg-background/50 border border-border focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 rounded-lg py-2.5 px-4 text-xs text-foreground outline-none transition-all"
                     />
                   </div>
                   <div>
-                    <label className="block text-[10px] font-bold text-zinc-500 uppercase tracking-wider mb-2">Confirm New Password</label>
+                    <label className="block text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-2">Confirm New Password</label>
                     <input
                       type="password"
                       required
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
-                      className="w-full bg-zinc-950/50 border border-zinc-800 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 rounded-lg py-2.5 px-4 text-xs text-white outline-none transition-all"
+                      className="w-full bg-background/50 border border-border focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 rounded-lg py-2.5 px-4 text-xs text-foreground outline-none transition-all"
                     />
                   </div>
                 </div>
@@ -643,7 +684,7 @@ export default function SettingsPage() {
                   <button
                     type="submit"
                     disabled={saving}
-                    className="inline-flex items-center space-x-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 disabled:bg-zinc-800 disabled:text-zinc-650 text-white text-xs font-bold rounded-lg transition-all"
+                    className="inline-flex items-center space-x-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 disabled:bg-secondary disabled:text-muted-foreground text-white text-xs font-bold rounded-lg transition-all cursor-pointer"
                   >
                     {saving && <RefreshCw className="w-3.5 h-3.5 animate-spin" />}
                     <span>Update Account Password</span>
@@ -656,16 +697,16 @@ export default function SettingsPage() {
             {activeTab === "memory" && (
               <form onSubmit={handleSaveMemory} className="space-y-6">
                 <div>
-                  <h3 className="text-base font-bold text-white mb-1">Copilot RAG Memory</h3>
-                  <p className="text-zinc-400 text-xs">Configure matching lookup limits, RAG instructions, and cache weights.</p>
+                  <h3 className="text-base font-bold text-foreground mb-1">Copilot RAG Memory</h3>
+                  <p className="text-muted-foreground text-xs">Configure matching lookup limits, RAG instructions, and cache weights.</p>
                 </div>
-                <hr className="border-zinc-900" />
+                <hr className="border-border" />
 
                 <div className="space-y-6">
                   <div>
                     <div className="flex justify-between items-center mb-2">
-                      <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">Candidate Match context limit</label>
-                      <span className="text-xs font-bold text-white">{ragLimit} Candidates</span>
+                      <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Candidate Match context limit</label>
+                      <span className="text-xs font-bold text-foreground">{ragLimit} Candidates</span>
                     </div>
                     <input
                       type="range"
@@ -676,16 +717,16 @@ export default function SettingsPage() {
                       onChange={(e) => setRagLimit(parseInt(e.target.value, 10))}
                       className="w-full accent-indigo-500"
                     />
-                    <span className="block text-[10px] text-zinc-500 mt-1.5">Max context matching candidates injected into Chat Copilot for answers.</span>
+                    <span className="block text-[10px] text-muted-foreground mt-1.5">Max context matching candidates injected into Chat Copilot for answers.</span>
                   </div>
 
                   <div>
-                    <label className="block text-[10px] font-bold text-zinc-500 uppercase tracking-wider mb-2">AI Copilot System Developer instructions</label>
+                    <label className="block text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-2">AI Copilot System Developer instructions</label>
                     <textarea
                       rows={4}
                       value={systemInstruction}
                       onChange={(e) => setSystemInstruction(e.target.value)}
-                      className="w-full bg-zinc-950/50 border border-zinc-800 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 rounded-lg py-2.5 px-4 text-xs text-white outline-none transition-all leading-relaxed"
+                      className="w-full bg-background/50 border border-border focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 rounded-lg py-2.5 px-4 text-xs text-foreground outline-none transition-all leading-relaxed"
                     />
                   </div>
                 </div>
@@ -693,7 +734,7 @@ export default function SettingsPage() {
                 <div className="flex justify-end pt-4">
                   <button
                     type="submit"
-                    className="inline-flex items-center px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-lg transition-all"
+                    className="inline-flex items-center px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-lg transition-all cursor-pointer"
                   >
                     <span>Save Copilot Config</span>
                   </button>
@@ -705,10 +746,10 @@ export default function SettingsPage() {
             {activeTab === "notifications" && (
               <form onSubmit={handleSaveNotifications} className="space-y-6">
                 <div>
-                  <h3 className="text-base font-bold text-white mb-1">Email & Telemetry Notifications</h3>
-                  <p className="text-zinc-400 text-xs">Configure what actions trigger real-time updates and weekly digests.</p>
+                  <h3 className="text-base font-bold text-foreground mb-1">Email & Telemetry Notifications</h3>
+                  <p className="text-muted-foreground text-xs">Configure what actions trigger real-time updates and weekly digests.</p>
                 </div>
-                <hr className="border-zinc-900" />
+                <hr className="border-border" />
 
                 <div className="space-y-5">
                   <div className="flex items-start space-x-3">
@@ -717,11 +758,11 @@ export default function SettingsPage() {
                       id="digests"
                       checked={emailDigests}
                       onChange={(e) => setEmailDigests(e.target.checked)}
-                      className="w-4 h-4 accent-indigo-500 mt-0.5 rounded border-zinc-800 focus:ring-0 focus:ring-offset-0 bg-zinc-950"
+                      className="w-4 h-4 accent-indigo-500 mt-0.5 rounded border-border focus:ring-0 focus:ring-offset-0 bg-background cursor-pointer"
                     />
                     <div>
-                      <label htmlFor="digests" className="text-xs font-bold text-white block">Send weekly candidate match digests</label>
-                      <span className="text-[10px] text-zinc-500 block mt-0.5">Receive summary reports on job scoring updates and newly parsed applications.</span>
+                      <label htmlFor="digests" className="text-xs font-bold text-foreground block cursor-pointer">Send weekly candidate match digests</label>
+                      <span className="text-[10px] text-muted-foreground block mt-0.5">Receive summary reports on job scoring updates and newly parsed applications.</span>
                     </div>
                   </div>
 
@@ -731,11 +772,11 @@ export default function SettingsPage() {
                       id="push"
                       checked={pushAlerts}
                       onChange={(e) => setPushAlerts(e.target.checked)}
-                      className="w-4 h-4 accent-indigo-500 mt-0.5 rounded border-zinc-800 focus:ring-0 focus:ring-offset-0 bg-zinc-950"
+                      className="w-4 h-4 accent-indigo-500 mt-0.5 rounded border-border focus:ring-0 focus:ring-offset-0 bg-background cursor-pointer"
                     />
                     <div>
-                      <label htmlFor="push" className="text-xs font-bold text-white block">Real-time push alerts for high-ranking candidates</label>
-                      <span className="text-[10px] text-zinc-500 block mt-0.5">Show web notification logs when candidates score above 85% match.</span>
+                      <label htmlFor="push" className="text-xs font-bold text-foreground block cursor-pointer">Real-time push alerts for high-ranking candidates</label>
+                      <span className="text-[10px] text-muted-foreground block mt-0.5">Show web notification logs when candidates score above 85% match.</span>
                     </div>
                   </div>
 
@@ -745,11 +786,11 @@ export default function SettingsPage() {
                       id="errors"
                       checked={errorAlerts}
                       onChange={(e) => setErrorAlerts(e.target.checked)}
-                      className="w-4 h-4 accent-indigo-500 mt-0.5 rounded border-zinc-800 focus:ring-0 focus:ring-offset-0 bg-zinc-950"
+                      className="w-4 h-4 accent-indigo-500 mt-0.5 rounded border-border focus:ring-0 focus:ring-offset-0 bg-background cursor-pointer"
                     />
                     <div>
-                      <label htmlFor="errors" className="text-xs font-bold text-white block">Email alerts on resume parsing errors</label>
-                      <span className="text-[10px] text-zinc-500 block mt-0.5">Alert if a PDF formatting issue or OCR issue causes parsing workflows to fail.</span>
+                      <label htmlFor="errors" className="text-xs font-bold text-foreground block cursor-pointer">Email alerts on resume parsing errors</label>
+                      <span className="text-[10px] text-muted-foreground block mt-0.5">Alert if a PDF formatting issue or OCR issue causes parsing workflows to fail.</span>
                     </div>
                   </div>
                 </div>
@@ -757,7 +798,7 @@ export default function SettingsPage() {
                 <div className="flex justify-end pt-4">
                   <button
                     type="submit"
-                    className="inline-flex items-center px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-lg transition-all"
+                    className="inline-flex items-center px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-lg transition-all cursor-pointer"
                   >
                     <span>Save Alert Preferences</span>
                   </button>
